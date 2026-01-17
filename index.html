@@ -238,7 +238,8 @@
         .planet-section {
             flex: 1;
             position: relative;
-            min-height: 700px;
+            min-height: 800px;
+            padding-bottom: 80px;
         }
 
         #canvas-container {
@@ -276,7 +277,7 @@
 
         .scroll-indicator {
             position: absolute;
-            bottom: -40px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
@@ -573,7 +574,7 @@
                 rgba(0, 206, 201, 0.8) 100%
             );
             background-size: 300% 100%;
-            animation: shiningBorder 4s linear infinite;
+            animation: shiningBorder 8s linear infinite;
             box-shadow:
                 0 0 20px rgba(108, 92, 231, 0.3),
                 0 0 40px rgba(0, 206, 201, 0.2),
@@ -597,7 +598,7 @@
                 transparent 100%
             );
             background-size: 200% 100%;
-            animation: shineEffect 3s ease-in-out infinite;
+            animation: shineEffect 6s ease-in-out infinite;
             pointer-events: none;
         }
 
