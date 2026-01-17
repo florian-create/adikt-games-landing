@@ -1449,6 +1449,7 @@
             const cardSize = 1.5;
             const cardDepth = 0.18;
             const cornerRadius = 0.32;
+            const borderWidth = 0.08;
 
             // Create rounded rectangle shape
             const createRoundedRect = (w, h, r) => {
@@ -1464,6 +1465,21 @@
                 shape.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
                 return shape;
             };
+
+            // Dark outer border frame
+            const outerBorderSize = cardSize + borderWidth * 2;
+            const outerBorderShape = createRoundedRect(outerBorderSize, outerBorderSize, cornerRadius + borderWidth);
+            const outerBorderGeo = new THREE.ExtrudeGeometry(outerBorderShape, {
+                depth: cardDepth + 0.02,
+                bevelEnabled: true,
+                bevelThickness: 0.02,
+                bevelSize: 0.02,
+                bevelSegments: 2
+            });
+            const outerBorderMat = new THREE.MeshBasicMaterial({ color: 0x1a1a2e });
+            const outerBorder = new THREE.Mesh(outerBorderGeo, outerBorderMat);
+            outerBorder.position.z = -cardDepth / 2 - 0.03;
+            appCard.add(outerBorder);
 
             // Card body with bevel
             const cardShape = createRoundedRect(cardSize, cardSize, cornerRadius);
