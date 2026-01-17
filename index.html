@@ -1469,12 +1469,12 @@
             icon.position.z = cardDepth / 2 + 0.04;
             appCard.add(icon);
 
-            // Orbit data
+            // Orbit data - passes in front of planet
             appCard.userData = {
                 angle: 0,
-                radius: planetRadius + 1.8,
-                speed: 0.003,
-                orbitTilt: Math.PI / 3
+                radius: planetRadius + 2.2,
+                speed: 0.004,
+                orbitTilt: Math.PI / 8
             };
 
 
@@ -1485,10 +1485,51 @@
         // ============ DISTANT PLANETS ============
         const distantPlanets = [];
 
-        // Mars-like red planet
-        const marsGeo = new THREE.SphereGeometry(0.8, 32, 32);
-        const marsMat = new THREE.ShaderMaterial({
+        // Fire planet - lava and flames
+        const fireGeo = new THREE.SphereGeometry(0.9, 32, 32);
+        const fireMat = new THREE.ShaderMaterial({
             uniforms: { time: { value: 0 } },
+            vertexShader: `
+                varying vec3 vPosition;
+                varying vec2 vUv;
+                void main() {
+                    vPosition = position;
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float time;
+                varying vec3 vPosition;
+                void main() {
+                    vec3 lavaRed = vec3(0.9, 0.2, 0.05);
+                    vec3 lavaOrange = vec3(1.0, 0.5, 0.1);
+                    vec3 lavaDark = vec3(0.3, 0.05, 0.02);
+                    vec3 lavaYellow = vec3(1.0, 0.8, 0.2);
+                    float noise = fract(sin(dot(vPosition.xy + time * 0.5, vec2(12.9898, 78.233))) * 43758.5453);
+                    float cracks = fract(sin(dot(vPosition.xz * 3.0, vec2(45.233, 12.898))) * 23421.631);
+                    vec3 color = mix(lavaDark, lavaRed, noise);
+                    color = mix(color, lavaOrange, cracks * 0.6);
+                    color = mix(color, lavaYellow, pow(cracks, 3.0) * 0.5);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const firePlanet = new THREE.Mesh(fireGeo, fireMat);
+        firePlanet.userData = {
+            angle: 0.3,
+            radius: 28,
+            speed: 0.0007,
+            orbitTilt: 0.15,
+            rotationSpeed: 0.003,
+            material: fireMat
+        };
+        distantPlanets.push(firePlanet);
+        scene.add(firePlanet);
+
+        // Ice planet - frozen with glaciers
+        const iceGeo = new THREE.SphereGeometry(0.7, 32, 32);
+        const iceMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
                 void main() {
@@ -1499,28 +1540,74 @@
             fragmentShader: `
                 varying vec3 vPosition;
                 void main() {
-                    vec3 baseColor = vec3(0.7, 0.3, 0.2);
-                    vec3 darkColor = vec3(0.4, 0.15, 0.1);
-                    float noise = fract(sin(dot(vPosition.xy, vec2(12.9898, 78.233))) * 43758.5453);
-                    vec3 color = mix(darkColor, baseColor, noise * 0.5 + 0.5);
+                    vec3 iceWhite = vec3(0.95, 0.98, 1.0);
+                    vec3 iceCyan = vec3(0.6, 0.9, 0.95);
+                    vec3 iceBlue = vec3(0.4, 0.7, 0.9);
+                    vec3 iceDeep = vec3(0.2, 0.4, 0.7);
+                    float noise = fract(sin(dot(vPosition.xy * 2.0, vec2(12.9898, 78.233))) * 43758.5453);
+                    float cracks = abs(sin(vPosition.x * 15.0) * sin(vPosition.z * 15.0));
+                    float polar = abs(vPosition.y) / 0.7;
+                    vec3 color = mix(iceBlue, iceCyan, noise);
+                    color = mix(color, iceWhite, polar * 0.7);
+                    color = mix(color, iceDeep, cracks * 0.3);
                     gl_FragColor = vec4(color, 1.0);
                 }
             `
         });
-        const mars = new THREE.Mesh(marsGeo, marsMat);
-        mars.userData = {
-            angle: 0,
-            radius: 45,
-            speed: 0.0004,
-            orbitTilt: 0.2,
+        const icePlanet = new THREE.Mesh(iceGeo, iceMat);
+        icePlanet.userData = {
+            angle: Math.PI * 0.7,
+            radius: 38,
+            speed: 0.0005,
+            orbitTilt: -0.1,
             rotationSpeed: 0.002
         };
-        distantPlanets.push(mars);
-        scene.add(mars);
+        distantPlanets.push(icePlanet);
+        scene.add(icePlanet);
+
+        // Forest planet - lush green vegetation
+        const forestGeo = new THREE.SphereGeometry(0.85, 32, 32);
+        const forestMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 forestDark = vec3(0.05, 0.2, 0.05);
+                    vec3 forestGreen = vec3(0.1, 0.45, 0.15);
+                    vec3 forestLight = vec3(0.2, 0.55, 0.2);
+                    vec3 forestJungle = vec3(0.15, 0.5, 0.1);
+                    vec3 waterBlue = vec3(0.1, 0.3, 0.5);
+                    float noise = fract(sin(dot(vPosition.xy * 1.5, vec2(12.9898, 78.233))) * 43758.5453);
+                    float detail = fract(sin(dot(vPosition.xz * 4.0, vec2(45.233, 78.898))) * 12345.678);
+                    float lakes = smoothstep(0.7, 0.75, noise);
+                    vec3 color = mix(forestDark, forestGreen, noise);
+                    color = mix(color, forestLight, detail * 0.4);
+                    color = mix(color, forestJungle, pow(detail, 2.0) * 0.5);
+                    color = mix(color, waterBlue, lakes * 0.8);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const forestPlanet = new THREE.Mesh(forestGeo, forestMat);
+        forestPlanet.userData = {
+            angle: Math.PI * 1.3,
+            radius: 45,
+            speed: 0.0004,
+            orbitTilt: 0.08,
+            rotationSpeed: 0.0025
+        };
+        distantPlanets.push(forestPlanet);
+        scene.add(forestPlanet);
 
         // Saturn-like ringed planet
         const saturnGroup = new THREE.Group();
-        const saturnGeo = new THREE.SphereGeometry(1.2, 32, 32);
+        const saturnGeo = new THREE.SphereGeometry(1.1, 32, 32);
         const saturnMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1544,7 +1631,7 @@
         saturnGroup.add(saturn);
 
         // Saturn rings
-        const ringGeo = new THREE.RingGeometry(1.6, 2.4, 64);
+        const ringGeo = new THREE.RingGeometry(1.5, 2.2, 64);
         const ringMat = new THREE.MeshBasicMaterial({
             color: 0xCCBB99,
             side: THREE.DoubleSide,
@@ -1557,48 +1644,16 @@
 
         saturnGroup.userData = {
             angle: Math.PI,
-            radius: 60,
-            speed: 0.0002,
-            orbitTilt: -0.3,
+            radius: 55,
+            speed: 0.00025,
+            orbitTilt: 0.12,
             rotationSpeed: 0.003
         };
         distantPlanets.push(saturnGroup);
         scene.add(saturnGroup);
 
-        // Ice planet (blue/cyan)
-        const iceGeo = new THREE.SphereGeometry(0.5, 32, 32);
-        const iceMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vPosition;
-                void main() {
-                    vPosition = position;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vPosition;
-                void main() {
-                    vec3 color1 = vec3(0.6, 0.85, 0.95);
-                    vec3 color2 = vec3(0.3, 0.6, 0.8);
-                    float pattern = sin(vPosition.x * 10.0 + vPosition.z * 10.0) * 0.5 + 0.5;
-                    vec3 color = mix(color1, color2, pattern);
-                    gl_FragColor = vec4(color, 1.0);
-                }
-            `
-        });
-        const icePlanet = new THREE.Mesh(iceGeo, iceMat);
-        icePlanet.userData = {
-            angle: Math.PI / 2,
-            radius: 35,
-            speed: 0.0006,
-            orbitTilt: 0.5,
-            rotationSpeed: 0.004
-        };
-        distantPlanets.push(icePlanet);
-        scene.add(icePlanet);
-
-        // Purple gas giant
-        const purpleGeo = new THREE.SphereGeometry(1.0, 32, 32);
+        // Purple gas giant with storms
+        const purpleGeo = new THREE.SphereGeometry(1.3, 32, 32);
         const purpleMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1623,14 +1678,49 @@
         });
         const purplePlanet = new THREE.Mesh(purpleGeo, purpleMat);
         purplePlanet.userData = {
-            angle: Math.PI * 1.5,
-            radius: 52,
-            speed: 0.0003,
-            orbitTilt: -0.15,
-            rotationSpeed: 0.0025
+            angle: Math.PI * 1.7,
+            radius: 65,
+            speed: 0.0002,
+            orbitTilt: -0.05,
+            rotationSpeed: 0.002
         };
         distantPlanets.push(purplePlanet);
-        scene.add(purplePlanet)
+        scene.add(purplePlanet);
+
+        // Desert planet - sandy dunes
+        const desertGeo = new THREE.SphereGeometry(0.6, 32, 32);
+        const desertMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 sandLight = vec3(0.9, 0.8, 0.6);
+                    vec3 sandDark = vec3(0.7, 0.55, 0.35);
+                    vec3 sandOrange = vec3(0.85, 0.6, 0.4);
+                    float dunes = sin(vPosition.x * 20.0 + vPosition.z * 15.0) * 0.5 + 0.5;
+                    float noise = fract(sin(dot(vPosition.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                    vec3 color = mix(sandDark, sandLight, dunes);
+                    color = mix(color, sandOrange, noise * 0.3);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const desertPlanet = new THREE.Mesh(desertGeo, desertMat);
+        desertPlanet.userData = {
+            angle: Math.PI * 0.4,
+            radius: 32,
+            speed: 0.0006,
+            orbitTilt: 0.2,
+            rotationSpeed: 0.003
+        };
+        distantPlanets.push(desertPlanet);
+        scene.add(desertPlanet)
 
         // ============ DIPLODOCUS herd walking together ============
         const dinosaurs = [];
@@ -1778,6 +1868,11 @@
 
                 planet.position.set(x, y, z);
                 planet.rotation.y += d.rotationSpeed;
+
+                // Update fire planet animation
+                if (d.material && d.material.uniforms && d.material.uniforms.time) {
+                    d.material.uniforms.time.value = time;
+                }
             });
 
             // App card orbit - ALWAYS facing camera
