@@ -1145,10 +1145,20 @@
         // ============ EARTH-LIKE PLANET ============
         const planetRadius = 7;
 
-        // Create Earth with procedural continents
+        // Create Earth with real texture
         const earthGeometry = new THREE.SphereGeometry(planetRadius, 128, 64);
 
-        // Custom shader for Earth
+        // Load Earth textures
+        const textureLoader = new THREE.TextureLoader();
+
+        // Earth day texture (NASA Blue Marble)
+        const earthTexture = textureLoader.load('https://unpkg.com/three-globe@2.24.13/example/img/earth-day.jpg');
+        earthTexture.anisotropy = 16;
+
+        // Cloud texture for animated clouds
+        const cloudTexture = textureLoader.load('https://unpkg.com/three-globe@2.24.13/example/img/earth-clouds.png');
+
+        // Custom shader for Earth with real texture + glow
         const earthVertexShader = `
             varying vec2 vUv;
             varying vec3 vNormal;
@@ -1166,144 +1176,41 @@
             varying vec3 vNormal;
             varying vec3 vPosition;
 
-            // Simplex noise functions
-            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-            float snoise(vec3 v) {
-                const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-                const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-                vec3 i = floor(v + dot(v, C.yyy));
-                vec3 x0 = v - i + dot(i, C.xxx);
-                vec3 g = step(x0.yzx, x0.xyz);
-                vec3 l = 1.0 - g;
-                vec3 i1 = min(g.xyz, l.zxy);
-                vec3 i2 = max(g.xyz, l.zxy);
-                vec3 x1 = x0 - i1 + C.xxx;
-                vec3 x2 = x0 - i2 + C.yyy;
-                vec3 x3 = x0 - D.yyy;
-                i = mod289(i);
-                vec4 p = permute(permute(permute(
-                    i.z + vec4(0.0, i1.z, i2.z, 1.0))
-                    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-                    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-                float n_ = 0.142857142857;
-                vec3 ns = n_ * D.wyz - D.xzx;
-                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-                vec4 x_ = floor(j * ns.z);
-                vec4 y_ = floor(j - 7.0 * x_);
-                vec4 x = x_ *ns.x + ns.yyyy;
-                vec4 y = y_ *ns.x + ns.yyyy;
-                vec4 h = 1.0 - abs(x) - abs(y);
-                vec4 b0 = vec4(x.xy, y.xy);
-                vec4 b1 = vec4(x.zw, y.zw);
-                vec4 s0 = floor(b0)*2.0 + 1.0;
-                vec4 s1 = floor(b1)*2.0 + 1.0;
-                vec4 sh = -step(h, vec4(0.0));
-                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-                vec3 p0 = vec3(a0.xy, h.x);
-                vec3 p1 = vec3(a0.zw, h.y);
-                vec3 p2 = vec3(a1.xy, h.z);
-                vec3 p3 = vec3(a1.zw, h.w);
-                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-                m = m * m;
-                return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-            }
-
+            uniform sampler2D earthMap;
+            uniform sampler2D cloudMap;
             uniform float time;
 
             void main() {
-                // Generate continent noise - bigger continents
-                vec3 pos = normalize(vPosition) * 1.5;
-                float continent = snoise(pos * 0.7);
-                continent += snoise(pos * 1.4) * 0.5;
-                continent += snoise(pos * 2.8) * 0.25;
-                continent += snoise(pos * 5.6) * 0.1;
+                // Sample Earth texture
+                vec3 surfaceColor = texture2D(earthMap, vUv).rgb;
 
-                // Ocean colors (deep blue)
-                vec3 oceanDeep = vec3(0.0, 0.03, 0.18);
-                vec3 oceanMid = vec3(0.0, 0.1, 0.35);
-                vec3 oceanShallow = vec3(0.05, 0.25, 0.5);
+                // Enhance colors slightly
+                surfaceColor = pow(surfaceColor, vec3(0.95)); // Slight brightness boost
+                surfaceColor *= 1.1; // Saturation boost
 
-                // Land colors - more vibrant and visible
-                vec3 landCoast = vec3(0.76, 0.7, 0.5);
-                vec3 landGreen = vec3(0.2, 0.55, 0.15);
-                vec3 landForest = vec3(0.08, 0.35, 0.1);
-                vec3 landBrown = vec3(0.55, 0.4, 0.22);
-                vec3 landMountain = vec3(0.5, 0.45, 0.4);
-                vec3 landSnowPeak = vec3(0.95, 0.97, 1.0);
-                vec3 landDesert = vec3(0.85, 0.72, 0.45);
+                // Animated clouds - offset UV for movement
+                vec2 cloudUv = vUv;
+                cloudUv.x += time * 0.003; // Slow cloud drift
+                float clouds = texture2D(cloudMap, cloudUv).r;
+                vec3 cloudColor = vec3(1.0);
+                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.35);
 
-                // Ice caps
-                float latitude = abs(vPosition.y / 7.0);
-                vec3 iceColor = vec3(0.98, 0.99, 1.0);
+                // Atmosphere glow at edges (fresnel effect)
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.5);
+                vec3 atmosphereColor = vec3(0.4, 0.7, 1.0);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.3);
 
-                // More land visible - lower threshold
-                float landThreshold = -0.1;
-                float isLand = smoothstep(landThreshold - 0.02, landThreshold + 0.08, continent);
+                // Subtle rim glow
+                surfaceColor += vec3(0.1, 0.2, 0.4) * fresnel * 0.5;
 
-                // Terrain detail noise
-                float terrainNoise = snoise(pos * 3.5);
-                float mountainNoise = snoise(pos * 2.0);
-
-                // Elevation for mountains
-                float elevation = (continent - landThreshold) * 1.5 + mountainNoise * 0.25;
-                elevation = max(0.0, elevation);
-
-                // Build land color based on elevation and latitude
-                float equator = 1.0 - latitude;
-                vec3 landColor = landCoast;
-                landColor = mix(landColor, landGreen, smoothstep(0.0, 0.2, elevation));
-                landColor = mix(landColor, landForest, smoothstep(0.15, 0.35, elevation) * (0.6 + terrainNoise * 0.4));
-                landColor = mix(landColor, landBrown, smoothstep(0.35, 0.55, elevation));
-                landColor = mix(landColor, landMountain, smoothstep(0.5, 0.7, elevation));
-                landColor = mix(landColor, landSnowPeak, smoothstep(0.65, 0.85, elevation));
-
-                // Desert in dry regions
-                float desertFactor = smoothstep(0.15, 0.45, terrainNoise) * equator * (1.0 - smoothstep(0.25, 0.45, elevation));
-                landColor = mix(landColor, landDesert, desertFactor * 0.5);
-
-                // Ocean depth variation
-                float oceanDepth = -continent + landThreshold;
-                vec3 ocean = oceanDeep;
-                ocean = mix(ocean, oceanMid, smoothstep(0.0, 0.4, oceanDepth));
-                ocean = mix(ocean, oceanShallow, smoothstep(0.4, 0.8, oceanDepth));
-
-                // Combine land and ocean
-                vec3 surfaceColor = mix(ocean, landColor, isLand);
-
-                // Add ice caps - polar regions
-                float iceCap = smoothstep(0.65, 0.85, latitude);
-                float iceOnLand = smoothstep(0.55, 0.75, latitude) * isLand;
-                surfaceColor = mix(surfaceColor, iceColor, max(iceCap * 0.9, iceOnLand * 0.8));
-
-                // Cloud layer - less dense
-                vec3 cloudPos = normalize(vPosition) * 2.0;
-                cloudPos.x += time * 0.015;
-                float clouds = snoise(cloudPos * 1.0);
-                clouds += snoise(cloudPos * 2.0) * 0.5;
-                clouds += snoise(cloudPos * 4.0) * 0.25;
-                clouds = smoothstep(0.2, 0.7, clouds);
-                vec3 cloudColor = vec3(1.0, 1.0, 1.0);
-                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.3);
-
-                // Add subtle atmosphere glow at edges only
-                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
-                vec3 atmosphereColor = vec3(0.5, 0.75, 1.0);
-                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.2);
-
-                // Very subtle rim light
-                surfaceColor += vec3(0.05, 0.08, 0.15) * fresnel;
-
-                // Sun lighting effect (simple directional)
+                // Sun lighting effect
                 vec3 sunDir = normalize(vec3(1.0, 0.3, 0.8));
                 float sunLight = max(0.0, dot(vNormal, sunDir));
-                surfaceColor *= 0.75 + sunLight * 0.35;
+                surfaceColor *= 0.6 + sunLight * 0.5;
+
+                // Night side subtle glow (city lights simulation)
+                float nightSide = 1.0 - sunLight;
+                nightSide = smoothstep(0.3, 0.7, nightSide);
 
                 gl_FragColor = vec4(surfaceColor, 1.0);
             }
@@ -1311,7 +1218,9 @@
 
         const earthMaterial = new THREE.ShaderMaterial({
             uniforms: {
-                time: { value: 0 }
+                time: { value: 0 },
+                earthMap: { value: earthTexture },
+                cloudMap: { value: cloudTexture }
             },
             vertexShader: earthVertexShader,
             fragmentShader: earthFragmentShader,
@@ -1321,8 +1230,8 @@
         const earth = new THREE.Mesh(earthGeometry, earthMaterial);
         scene.add(earth);
 
-        // Atmosphere glow - enhanced blue aura
-        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.12, 64, 32);
+        // Atmosphere glow - enhanced blue aura (inner layer)
+        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.08, 64, 32);
         const atmosphereMaterial = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1334,9 +1243,9 @@
             fragmentShader: `
                 varying vec3 vNormal;
                 void main() {
-                    float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                    vec3 atmosphere = vec3(0.35, 0.65, 1.0) * intensity;
-                    gl_FragColor = vec4(atmosphere, intensity * 0.7);
+                    float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                    vec3 atmosphere = vec3(0.3, 0.6, 1.0) * intensity;
+                    gl_FragColor = vec4(atmosphere, intensity * 0.8);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1350,8 +1259,37 @@
         atmosphere.renderOrder = -5;
         scene.add(atmosphere);
 
-        // Outer glow layer - softer blue halo
-        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.25, 32, 32);
+        // Middle glow layer - main blue halo
+        const midGlowGeo = new THREE.SphereGeometry(planetRadius * 1.18, 48, 32);
+        const midGlowMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    vec3 glow = vec3(0.25, 0.55, 0.95) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.6);
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
+        });
+
+        const midGlow = new THREE.Mesh(midGlowGeo, midGlowMat);
+        midGlow.renderOrder = -6;
+        scene.add(midGlow);
+
+        // Outer glow layer - softer diffuse halo
+        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.35, 32, 32);
         const outerGlowMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1364,8 +1302,8 @@
                 varying vec3 vNormal;
                 void main() {
                     float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-                    vec3 glow = vec3(0.2, 0.5, 0.9) * intensity;
-                    gl_FragColor = vec4(glow, intensity * 0.3);
+                    vec3 glow = vec3(0.15, 0.4, 0.85) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.35);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1376,7 +1314,7 @@
         });
 
         const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-        outerGlow.renderOrder = -5;
+        outerGlow.renderOrder = -7;
         scene.add(outerGlow);
 
         // Stars
