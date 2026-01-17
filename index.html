@@ -1193,15 +1193,15 @@
                 cloudUv.x += time * 0.003; // Slow cloud drift
                 float clouds = texture2D(cloudMap, cloudUv).r;
                 vec3 cloudColor = vec3(1.0);
-                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.35);
+                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.25);
 
-                // Atmosphere glow at edges (fresnel effect)
-                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.5);
+                // Very subtle atmosphere at edges (fresnel effect)
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 5.0);
                 vec3 atmosphereColor = vec3(0.4, 0.7, 1.0);
-                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.3);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.15);
 
-                // Subtle rim glow
-                surfaceColor += vec3(0.1, 0.2, 0.4) * fresnel * 0.5;
+                // Thin rim highlight
+                surfaceColor += vec3(0.05, 0.1, 0.2) * fresnel * 0.3;
 
                 // Sun lighting effect
                 vec3 sunDir = normalize(vec3(1.0, 0.3, 0.8));
@@ -1230,8 +1230,8 @@
         const earth = new THREE.Mesh(earthGeometry, earthMaterial);
         scene.add(earth);
 
-        // Atmosphere glow - enhanced blue aura (inner layer)
-        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.08, 64, 32);
+        // Subtle atmosphere glow - thin blue edge
+        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.03, 64, 32);
         const atmosphereMaterial = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1243,9 +1243,9 @@
             fragmentShader: `
                 varying vec3 vNormal;
                 void main() {
-                    float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                    float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0);
                     vec3 atmosphere = vec3(0.3, 0.6, 1.0) * intensity;
-                    gl_FragColor = vec4(atmosphere, intensity * 0.8);
+                    gl_FragColor = vec4(atmosphere, intensity * 0.5);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1258,64 +1258,6 @@
         const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
         atmosphere.renderOrder = -5;
         scene.add(atmosphere);
-
-        // Middle glow layer - main blue halo
-        const midGlowGeo = new THREE.SphereGeometry(planetRadius * 1.18, 48, 32);
-        const midGlowMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                void main() {
-                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                    vec3 glow = vec3(0.25, 0.55, 0.95) * intensity;
-                    gl_FragColor = vec4(glow, intensity * 0.6);
-                }
-            `,
-            blending: THREE.AdditiveBlending,
-            side: THREE.BackSide,
-            transparent: true,
-            depthWrite: false,
-            depthTest: false
-        });
-
-        const midGlow = new THREE.Mesh(midGlowGeo, midGlowMat);
-        midGlow.renderOrder = -6;
-        scene.add(midGlow);
-
-        // Outer glow layer - softer diffuse halo
-        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.35, 32, 32);
-        const outerGlowMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                void main() {
-                    float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-                    vec3 glow = vec3(0.15, 0.4, 0.85) * intensity;
-                    gl_FragColor = vec4(glow, intensity * 0.35);
-                }
-            `,
-            blending: THREE.AdditiveBlending,
-            side: THREE.BackSide,
-            transparent: true,
-            depthWrite: false,
-            depthTest: false
-        });
-
-        const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-        outerGlow.renderOrder = -7;
-        scene.add(outerGlow);
 
         // Stars
         const starsGeometry = new THREE.BufferGeometry();
