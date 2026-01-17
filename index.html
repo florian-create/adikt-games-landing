@@ -1142,13 +1142,11 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        // ============ EARTH-LIKE PLANET ============
+        // ============ ICY PLANET WITH GLOW ============
         const planetRadius = 7;
 
-        // Create Earth with procedural continents
         const earthGeometry = new THREE.SphereGeometry(planetRadius, 128, 64);
 
-        // Custom shader for procedural Earth
         const earthVertexShader = `
             varying vec2 vUv;
             varying vec3 vNormal;
@@ -1166,7 +1164,7 @@
             varying vec3 vNormal;
             varying vec3 vPosition;
 
-            // Simplex noise functions
+            // Simplex noise
             vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -1218,124 +1216,71 @@
             uniform float time;
 
             void main() {
-                // Generate continent noise - more detail
                 vec3 pos = normalize(vPosition) * 1.5;
-                float continent = snoise(pos * 0.7);
-                continent += snoise(pos * 1.4) * 0.5;
-                continent += snoise(pos * 2.8) * 0.25;
-                continent += snoise(pos * 5.6) * 0.12;
 
-                // Ocean colors - deep vibrant blue
-                vec3 oceanDeep = vec3(0.01, 0.05, 0.2);
-                vec3 oceanMid = vec3(0.03, 0.15, 0.4);
-                vec3 oceanShallow = vec3(0.08, 0.32, 0.5);
-                vec3 oceanCoast = vec3(0.15, 0.45, 0.55);
+                // Ice terrain noise
+                float terrain = snoise(pos * 0.8);
+                terrain += snoise(pos * 1.6) * 0.5;
+                terrain += snoise(pos * 3.2) * 0.25;
+                terrain += snoise(pos * 6.4) * 0.12;
 
-                // Land colors - vivid and detailed
-                vec3 beach = vec3(0.9, 0.82, 0.6);
-                vec3 grass = vec3(0.3, 0.6, 0.2);
-                vec3 forest = vec3(0.08, 0.35, 0.12);
-                vec3 darkForest = vec3(0.04, 0.22, 0.08);
-                vec3 savanna = vec3(0.7, 0.65, 0.35);
-                vec3 mountain = vec3(0.5, 0.42, 0.35);
-                vec3 rock = vec3(0.35, 0.32, 0.3);
-                vec3 snow = vec3(0.97, 0.98, 1.0);
-                vec3 desert = vec3(0.92, 0.78, 0.45);
-                vec3 redDesert = vec3(0.8, 0.5, 0.3);
+                // Ice colors - cyan to white
+                vec3 iceDeep = vec3(0.1, 0.3, 0.5);
+                vec3 iceMid = vec3(0.4, 0.7, 0.9);
+                vec3 iceLight = vec3(0.7, 0.9, 1.0);
+                vec3 iceWhite = vec3(0.95, 0.98, 1.0);
+                vec3 iceCrystal = vec3(0.6, 0.85, 1.0);
 
-                // Lava/magma colors for cracks
-                vec3 lavaRed = vec3(1.0, 0.2, 0.0);
-                vec3 lavaOrange = vec3(1.0, 0.5, 0.1);
-                vec3 lavaYellow = vec3(1.0, 0.8, 0.3);
+                // Frozen ocean - deep blue
+                vec3 frozenOcean = vec3(0.05, 0.15, 0.35);
+                vec3 frozenOceanMid = vec3(0.1, 0.25, 0.5);
 
-                // Land threshold
-                float landThreshold = -0.08;
-                float isLand = smoothstep(landThreshold - 0.02, landThreshold + 0.08, continent);
+                // Glaciers and ice sheets
+                float iceLevel = smoothstep(-0.3, 0.4, terrain);
 
-                // Detailed terrain variation
-                float terrainNoise = snoise(pos * 4.5);
-                float microDetail = snoise(pos * 12.0) * 0.3;
-                float elevation = max(0.0, (continent - landThreshold) * 2.0 + microDetail * 0.1);
+                // Surface color based on terrain
+                vec3 surfaceColor = frozenOcean;
+                surfaceColor = mix(surfaceColor, frozenOceanMid, smoothstep(-0.5, -0.1, terrain));
+                surfaceColor = mix(surfaceColor, iceDeep, smoothstep(-0.1, 0.1, terrain));
+                surfaceColor = mix(surfaceColor, iceMid, smoothstep(0.1, 0.3, terrain));
+                surfaceColor = mix(surfaceColor, iceLight, smoothstep(0.3, 0.5, terrain));
+                surfaceColor = mix(surfaceColor, iceWhite, smoothstep(0.5, 0.7, terrain));
 
-                // Latitude for climate zones
+                // Ice cracks - glowing cyan
+                float crackNoise = snoise(pos * 5.0);
+                float crackNoise2 = snoise(pos * 10.0);
+                float cracks = abs(crackNoise * crackNoise2);
+                cracks = 1.0 - smoothstep(0.0, 0.02, cracks);
+
+                // Glowing cracks
+                vec3 crackGlow = vec3(0.3, 0.8, 1.0);
+                surfaceColor = mix(surfaceColor, crackGlow, cracks * 0.8);
+
+                // Soft crack glow around
+                float softGlow = 1.0 - smoothstep(0.0, 0.08, abs(crackNoise * crackNoise2));
+                surfaceColor += crackGlow * softGlow * 0.3;
+
+                // Crystal shimmer
+                float shimmer = snoise(pos * 15.0 + time * 0.5);
+                shimmer = pow(max(0.0, shimmer), 3.0);
+                surfaceColor += iceCrystal * shimmer * 0.15;
+
+                // Aurora-like glow near poles
                 float latitude = abs(vPosition.y / 7.0);
-                float equator = 1.0 - latitude;
-                float tropics = smoothstep(0.1, 0.4, equator) * smoothstep(0.4, 0.1, latitude);
+                float aurora = smoothstep(0.5, 0.9, latitude);
+                vec3 auroraColor = mix(vec3(0.2, 0.8, 0.5), vec3(0.5, 0.3, 0.9), sin(time + pos.x * 3.0) * 0.5 + 0.5);
+                surfaceColor += auroraColor * aurora * 0.2;
 
-                // Build detailed land color by elevation and climate
-                vec3 landColor = beach;
-                landColor = mix(landColor, grass, smoothstep(0.0, 0.12, elevation));
-                landColor = mix(landColor, savanna, smoothstep(0.08, 0.2, elevation) * tropics * 0.6);
-                landColor = mix(landColor, forest, smoothstep(0.1, 0.25, elevation) * (0.6 + terrainNoise * 0.4));
-                landColor = mix(landColor, darkForest, smoothstep(0.2, 0.35, elevation) * (1.0 - tropics) * 0.5);
-                landColor = mix(landColor, mountain, smoothstep(0.3, 0.5, elevation));
-                landColor = mix(landColor, rock, smoothstep(0.45, 0.6, elevation));
-                landColor = mix(landColor, snow, smoothstep(0.55, 0.7, elevation));
-
-                // Desert zones - varied
-                float desertZone = smoothstep(0.15, 0.5, terrainNoise) * smoothstep(0.25, 0.55, equator);
-                desertZone *= (1.0 - smoothstep(0.15, 0.35, elevation));
-                landColor = mix(landColor, desert, desertZone * 0.7);
-
-                // Red desert patches
-                float redDesertZone = smoothstep(0.4, 0.7, terrainNoise + microDetail) * desertZone;
-                landColor = mix(landColor, redDesert, redDesertZone * 0.4);
-
-                // Ocean depth with more variation
-                float oceanDepth = -continent + landThreshold;
-                vec3 ocean = oceanDeep;
-                ocean = mix(ocean, oceanMid, smoothstep(0.0, 0.4, oceanDepth));
-                ocean = mix(ocean, oceanShallow, smoothstep(0.4, 0.8, oceanDepth));
-                ocean = mix(ocean, oceanCoast, smoothstep(0.8, 1.0, oceanDepth) * 0.5);
-
-                // Combine land and ocean
-                vec3 surfaceColor = mix(ocean, landColor, isLand);
-
-                // Ice caps at poles - more detailed
-                float iceCap = smoothstep(0.65, 0.85, latitude);
-                float iceShelf = smoothstep(0.55, 0.7, latitude) * (1.0 - isLand) * 0.4;
-                surfaceColor = mix(surfaceColor, snow, max(iceCap * 0.9, iceShelf));
-
-                // Volcanic cracks with glowing lava
-                float crackNoise1 = snoise(pos * 8.0);
-                float crackNoise2 = snoise(pos * 16.0);
-                float cracks = abs(crackNoise1 * crackNoise2);
-                cracks = 1.0 - smoothstep(0.0, 0.015, cracks);
-
-                // Cracks more visible in volcanic/mountain regions
-                float volcanicZone = smoothstep(0.35, 0.55, elevation) * isLand;
-                cracks *= volcanicZone * 0.8;
-
-                // Animated lava glow
-                float lavaFlow = sin(time * 2.0 + crackNoise1 * 10.0) * 0.3 + 0.7;
-                vec3 lavaColor = mix(lavaRed, lavaOrange, lavaFlow);
-                lavaColor = mix(lavaColor, lavaYellow, pow(lavaFlow, 2.0) * 0.5);
-
-                // Add glowing cracks
-                surfaceColor = mix(surfaceColor, lavaColor, cracks);
-
-                // Add glow around cracks
-                float crackGlow = 1.0 - smoothstep(0.0, 0.05, abs(crackNoise1 * crackNoise2));
-                crackGlow *= volcanicZone * 0.3;
-                surfaceColor += lavaOrange * crackGlow * 0.5;
-
-                // Soft clouds - thinner
-                vec3 cloudPos = normalize(vPosition) * 2.0;
-                cloudPos.x += time * 0.01;
-                float clouds = snoise(cloudPos * 1.0);
-                clouds += snoise(cloudPos * 2.0) * 0.5;
-                clouds = smoothstep(0.3, 0.8, clouds);
-                surfaceColor = mix(surfaceColor, vec3(1.0), clouds * 0.15);
-
-                // Sun lighting - more contrast
+                // Sun lighting
                 vec3 sunDir = normalize(vec3(1.0, 0.3, 0.8));
                 float sunLight = max(0.0, dot(vNormal, sunDir));
-                surfaceColor *= 0.65 + sunLight * 0.45;
+                surfaceColor *= 0.6 + sunLight * 0.5;
 
-                // Very subtle edge atmosphere
-                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 4.0);
-                vec3 atmosphereColor = vec3(0.4, 0.7, 1.0);
-                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.08);
+                // Strong fresnel glow - icy atmosphere
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.5);
+                vec3 atmosphereColor = vec3(0.4, 0.75, 1.0);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.4);
+                surfaceColor += vec3(0.2, 0.5, 0.8) * fresnel * 0.3;
 
                 gl_FragColor = vec4(surfaceColor, 1.0);
             }
@@ -1353,8 +1298,8 @@
         const earth = new THREE.Mesh(earthGeometry, earthMaterial);
         scene.add(earth);
 
-        // Thin atmosphere edge - subtle
-        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.02, 64, 32);
+        // Inner atmosphere - bright cyan glow
+        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.08, 64, 32);
         const atmosphereMaterial = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1366,9 +1311,9 @@
             fragmentShader: `
                 varying vec3 vNormal;
                 void main() {
-                    float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.5);
-                    vec3 atmosphere = vec3(0.3, 0.6, 1.0) * intensity;
-                    gl_FragColor = vec4(atmosphere, intensity * 0.4);
+                    float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    vec3 atmosphere = vec3(0.3, 0.7, 1.0) * intensity;
+                    gl_FragColor = vec4(atmosphere, intensity * 0.85);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1381,6 +1326,64 @@
         const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
         atmosphere.renderOrder = -5;
         scene.add(atmosphere);
+
+        // Middle glow - softer cyan
+        const midGlowGeo = new THREE.SphereGeometry(planetRadius * 1.18, 48, 32);
+        const midGlowMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    vec3 glow = vec3(0.25, 0.6, 0.95) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.6);
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
+        });
+
+        const midGlow = new THREE.Mesh(midGlowGeo, midGlowMat);
+        midGlow.renderOrder = -6;
+        scene.add(midGlow);
+
+        // Outer glow - diffuse halo
+        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.35, 32, 32);
+        const outerGlowMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.55 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                    vec3 glow = vec3(0.2, 0.5, 0.9) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.35);
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
+        });
+
+        const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
+        outerGlow.renderOrder = -7;
+        scene.add(outerGlow);
 
         // Stars
         const starsGeometry = new THREE.BufferGeometry();
