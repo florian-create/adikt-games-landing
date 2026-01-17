@@ -1360,10 +1360,12 @@
                 }
             `,
             transparent: true,
-            depthWrite: false
+            depthWrite: false,
+            depthTest: true
         });
 
         const clouds = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
+        clouds.renderOrder = 1;
         scene.add(clouds);
 
 
@@ -1477,7 +1479,7 @@
                 orbitTilt: Math.PI / 8
             };
 
-
+            appCard.renderOrder = 10;
             scene.add(appCard);
         };
         img.src = 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/460x0w.webp';
@@ -1524,6 +1526,7 @@
             rotationSpeed: 0.003,
             material: fireMat
         };
+        firePlanet.renderOrder = 5;
         distantPlanets.push(firePlanet);
         scene.add(firePlanet);
 
@@ -1562,6 +1565,7 @@
             orbitTilt: -0.1,
             rotationSpeed: 0.002
         };
+        icePlanet.renderOrder = 5;
         distantPlanets.push(icePlanet);
         scene.add(icePlanet);
 
@@ -1602,6 +1606,7 @@
             orbitTilt: 0.08,
             rotationSpeed: 0.0025
         };
+        forestPlanet.renderOrder = 5;
         distantPlanets.push(forestPlanet);
         scene.add(forestPlanet);
 
@@ -1649,6 +1654,7 @@
             orbitTilt: 0.12,
             rotationSpeed: 0.003
         };
+        saturnGroup.renderOrder = 5;
         distantPlanets.push(saturnGroup);
         scene.add(saturnGroup);
 
@@ -1684,6 +1690,7 @@
             orbitTilt: -0.05,
             rotationSpeed: 0.002
         };
+        purplePlanet.renderOrder = 5;
         distantPlanets.push(purplePlanet);
         scene.add(purplePlanet);
 
@@ -1719,8 +1726,9 @@
             orbitTilt: 0.2,
             rotationSpeed: 0.003
         };
+        desertPlanet.renderOrder = 5;
         distantPlanets.push(desertPlanet);
-        scene.add(desertPlanet)
+        scene.add(desertPlanet);
 
         // ============ DIPLODOCUS herd walking together ============
         const dinosaurs = [];
