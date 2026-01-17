@@ -1303,11 +1303,13 @@
             `,
             blending: THREE.AdditiveBlending,
             side: THREE.BackSide,
-            transparent: true
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
         });
 
         const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-        atmosphere.renderOrder = -2;
+        atmosphere.renderOrder = -5;
         scene.add(atmosphere);
 
         // Outer glow layer - softer blue halo
@@ -1330,11 +1332,13 @@
             `,
             blending: THREE.AdditiveBlending,
             side: THREE.BackSide,
-            transparent: true
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
         });
 
         const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-        outerGlow.renderOrder = -2;
+        outerGlow.renderOrder = -5;
         scene.add(outerGlow);
 
         // Stars
@@ -1789,6 +1793,21 @@
 
                 // Slight tilt to show 3D depth while keeping logo visible
                 appCard.rotation.x += 0.1;
+
+                // Shadow effect when passing behind planet
+                const behindFactor = Math.max(0, -z / radius);
+                const shadowIntensity = 1 - behindFactor * 0.7;
+                appCard.children.forEach(child => {
+                    if (child.material) {
+                        if (child.material.color) {
+                            const gray = shadowIntensity;
+                            child.material.color.setRGB(gray, gray, gray);
+                        }
+                        if (child.material.opacity !== undefined && child.material.map) {
+                            child.material.opacity = shadowIntensity;
+                        }
+                    }
+                });
             }
 
 
