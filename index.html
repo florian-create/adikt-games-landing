@@ -1466,16 +1466,17 @@
                 return shape;
             };
 
-            // Black frame border - ring shape with hole
-            const outerSize = cardSize + borderWidth * 2;
-            const outerShape = createRoundedRect(outerSize, outerSize, cornerRadius + borderWidth);
-            const innerHole = createRoundedRect(cardSize, cardSize, cornerRadius);
-            outerShape.holes.push(innerHole);
-            const frameGeo = new THREE.ShapeGeometry(outerShape);
-            const frameMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-            const frame = new THREE.Mesh(frameGeo, frameMat);
-            frame.position.z = cardDepth / 2 + 0.05;
-            appCard.add(frame);
+            // Dark border behind the card
+            const borderSize = cardSize + borderWidth;
+            const borderShape = createRoundedRect(borderSize, borderSize, cornerRadius + 0.05);
+            const borderGeo = new THREE.ExtrudeGeometry(borderShape, {
+                depth: cardDepth + 0.06,
+                bevelEnabled: false
+            });
+            const borderMat = new THREE.MeshBasicMaterial({ color: 0x0a0a15 });
+            const border = new THREE.Mesh(borderGeo, borderMat);
+            border.position.z = -cardDepth / 2 - 0.04;
+            appCard.add(border);
 
             // Card body with bevel
             const cardShape = createRoundedRect(cardSize, cardSize, cornerRadius);
