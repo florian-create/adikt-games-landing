@@ -93,7 +93,7 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 16px 40px;
+            padding: 20px 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -104,12 +104,14 @@
             display: flex;
             align-items: center;
             text-decoration: none;
+            flex-shrink: 0;
         }
 
         .logo-text {
-            font-size: 42px;
+            font-size: 38px;
             font-weight: 900;
-            letter-spacing: -2px;
+            letter-spacing: -1px;
+            white-space: nowrap;
             background: linear-gradient(
                 135deg,
                 #6C5CE7 0%,
@@ -1304,7 +1306,7 @@
         });
 
         const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-        atmosphere.renderOrder = 0;
+        atmosphere.renderOrder = -2;
         scene.add(atmosphere);
 
         // Outer glow layer - softer blue halo
@@ -1331,7 +1333,7 @@
         });
 
         const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-        outerGlow.renderOrder = 0;
+        outerGlow.renderOrder = -2;
         scene.add(outerGlow);
 
         // Clouds layer - more visible
@@ -1404,16 +1406,16 @@
                     clouds += snoise(pos * 3.0) * 0.5;
                     clouds += snoise(pos * 6.0) * 0.25;
                     clouds = smoothstep(0.0, 0.7, clouds);
-                    gl_FragColor = vec4(1.0, 1.0, 1.0, clouds * 0.55);
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, clouds * 0.35);
                 }
             `,
             transparent: true,
             depthWrite: false,
-            depthTest: true
+            depthTest: false
         });
 
         const clouds = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
-        clouds.renderOrder = 1;
+        clouds.renderOrder = -1;
         scene.add(clouds);
 
 
