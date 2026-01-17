@@ -1258,6 +1258,7 @@
         });
 
         const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+        atmosphere.renderOrder = 0;
         scene.add(atmosphere);
 
         // Outer glow layer - softer blue halo
@@ -1284,6 +1285,7 @@
         });
 
         const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
+        outerGlow.renderOrder = 0;
         scene.add(outerGlow);
 
         // Clouds layer - more visible
@@ -1488,7 +1490,7 @@
         const distantPlanets = [];
 
         // Fire planet - lava and flames
-        const fireGeo = new THREE.SphereGeometry(0.9, 32, 32);
+        const fireGeo = new THREE.SphereGeometry(0.35, 32, 32);
         const fireMat = new THREE.ShaderMaterial({
             uniforms: { time: { value: 0 } },
             vertexShader: `
@@ -1531,7 +1533,7 @@
         scene.add(firePlanet);
 
         // Ice planet - frozen with glaciers
-        const iceGeo = new THREE.SphereGeometry(0.7, 32, 32);
+        const iceGeo = new THREE.SphereGeometry(0.25, 32, 32);
         const iceMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1570,7 +1572,7 @@
         scene.add(icePlanet);
 
         // Forest planet - lush green vegetation
-        const forestGeo = new THREE.SphereGeometry(0.85, 32, 32);
+        const forestGeo = new THREE.SphereGeometry(0.3, 32, 32);
         const forestMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1612,7 +1614,7 @@
 
         // Saturn-like ringed planet
         const saturnGroup = new THREE.Group();
-        const saturnGeo = new THREE.SphereGeometry(1.1, 32, 32);
+        const saturnGeo = new THREE.SphereGeometry(0.4, 32, 32);
         const saturnMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1636,7 +1638,7 @@
         saturnGroup.add(saturn);
 
         // Saturn rings
-        const ringGeo = new THREE.RingGeometry(1.5, 2.2, 64);
+        const ringGeo = new THREE.RingGeometry(0.55, 0.8, 64);
         const ringMat = new THREE.MeshBasicMaterial({
             color: 0xCCBB99,
             side: THREE.DoubleSide,
@@ -1659,7 +1661,7 @@
         scene.add(saturnGroup);
 
         // Purple gas giant with storms
-        const purpleGeo = new THREE.SphereGeometry(1.3, 32, 32);
+        const purpleGeo = new THREE.SphereGeometry(0.45, 32, 32);
         const purpleMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
@@ -1695,7 +1697,7 @@
         scene.add(purplePlanet);
 
         // Desert planet - sandy dunes
-        const desertGeo = new THREE.SphereGeometry(0.6, 32, 32);
+        const desertGeo = new THREE.SphereGeometry(0.2, 32, 32);
         const desertMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vPosition;
