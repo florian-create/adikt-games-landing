@@ -1218,96 +1218,92 @@
             uniform float time;
 
             void main() {
-                // Generate continent noise - more Earth-like
-                vec3 pos = normalize(vPosition) * 1.8;
-                float continent = snoise(pos * 0.8);
-                continent += snoise(pos * 1.6) * 0.5;
-                continent += snoise(pos * 3.2) * 0.25;
-                continent += snoise(pos * 6.4) * 0.125;
+                // Generate continent noise - bigger continents
+                vec3 pos = normalize(vPosition) * 1.5;
+                float continent = snoise(pos * 0.7);
+                continent += snoise(pos * 1.4) * 0.5;
+                continent += snoise(pos * 2.8) * 0.25;
+                continent += snoise(pos * 5.6) * 0.1;
 
-                // Ocean colors (deep blue gradient)
-                vec3 oceanDeep = vec3(0.0, 0.02, 0.12);
-                vec3 oceanMid = vec3(0.0, 0.08, 0.28);
-                vec3 oceanShallow = vec3(0.02, 0.18, 0.42);
-                vec3 oceanBright = vec3(0.1, 0.35, 0.55);
+                // Ocean colors (deep blue)
+                vec3 oceanDeep = vec3(0.0, 0.03, 0.18);
+                vec3 oceanMid = vec3(0.0, 0.1, 0.35);
+                vec3 oceanShallow = vec3(0.05, 0.25, 0.5);
 
-                // Land colors - realistic Earth tones
-                vec3 landCoast = vec3(0.6, 0.55, 0.4);
-                vec3 landGreen = vec3(0.15, 0.42, 0.12);
-                vec3 landForest = vec3(0.05, 0.28, 0.08);
-                vec3 landBrown = vec3(0.4, 0.3, 0.18);
-                vec3 landMountain = vec3(0.45, 0.4, 0.35);
-                vec3 landSnowPeak = vec3(0.92, 0.94, 0.96);
-                vec3 landDesert = vec3(0.75, 0.62, 0.4);
+                // Land colors - more vibrant and visible
+                vec3 landCoast = vec3(0.76, 0.7, 0.5);
+                vec3 landGreen = vec3(0.2, 0.55, 0.15);
+                vec3 landForest = vec3(0.08, 0.35, 0.1);
+                vec3 landBrown = vec3(0.55, 0.4, 0.22);
+                vec3 landMountain = vec3(0.5, 0.45, 0.4);
+                vec3 landSnowPeak = vec3(0.95, 0.97, 1.0);
+                vec3 landDesert = vec3(0.85, 0.72, 0.45);
 
                 // Ice caps
                 float latitude = abs(vPosition.y / 7.0);
-                vec3 iceColor = vec3(0.95, 0.97, 1.0);
+                vec3 iceColor = vec3(0.98, 0.99, 1.0);
 
-                // Sharper land/ocean boundary
-                float landThreshold = 0.08;
-                float isLand = smoothstep(landThreshold - 0.03, landThreshold + 0.05, continent);
-                float coastLine = smoothstep(landThreshold - 0.03, landThreshold + 0.12, continent);
+                // More land visible - lower threshold
+                float landThreshold = -0.1;
+                float isLand = smoothstep(landThreshold - 0.02, landThreshold + 0.08, continent);
 
                 // Terrain detail noise
-                float terrainNoise = snoise(pos * 4.0);
-                float mountainNoise = snoise(pos * 2.5);
-                float detailNoise = snoise(pos * 8.0);
+                float terrainNoise = snoise(pos * 3.5);
+                float mountainNoise = snoise(pos * 2.0);
 
                 // Elevation for mountains
-                float elevation = (continent - landThreshold) * 2.0 + mountainNoise * 0.3;
+                float elevation = (continent - landThreshold) * 1.5 + mountainNoise * 0.25;
                 elevation = max(0.0, elevation);
 
                 // Build land color based on elevation and latitude
                 float equator = 1.0 - latitude;
                 vec3 landColor = landCoast;
-                landColor = mix(landColor, landGreen, smoothstep(0.0, 0.15, elevation));
-                landColor = mix(landColor, landForest, smoothstep(0.1, 0.25, elevation) * (0.5 + terrainNoise * 0.5));
-                landColor = mix(landColor, landBrown, smoothstep(0.25, 0.45, elevation));
-                landColor = mix(landColor, landMountain, smoothstep(0.4, 0.6, elevation));
-                landColor = mix(landColor, landSnowPeak, smoothstep(0.55, 0.75, elevation));
+                landColor = mix(landColor, landGreen, smoothstep(0.0, 0.2, elevation));
+                landColor = mix(landColor, landForest, smoothstep(0.15, 0.35, elevation) * (0.6 + terrainNoise * 0.4));
+                landColor = mix(landColor, landBrown, smoothstep(0.35, 0.55, elevation));
+                landColor = mix(landColor, landMountain, smoothstep(0.5, 0.7, elevation));
+                landColor = mix(landColor, landSnowPeak, smoothstep(0.65, 0.85, elevation));
 
-                // Desert in dry regions (near equator, specific areas)
-                float desertFactor = smoothstep(0.2, 0.5, terrainNoise) * equator * (1.0 - smoothstep(0.3, 0.5, elevation));
-                landColor = mix(landColor, landDesert, desertFactor * 0.6);
+                // Desert in dry regions
+                float desertFactor = smoothstep(0.15, 0.45, terrainNoise) * equator * (1.0 - smoothstep(0.25, 0.45, elevation));
+                landColor = mix(landColor, landDesert, desertFactor * 0.5);
 
-                // Ocean depth variation with realistic colors
+                // Ocean depth variation
                 float oceanDepth = -continent + landThreshold;
                 vec3 ocean = oceanDeep;
-                ocean = mix(ocean, oceanMid, smoothstep(0.0, 0.3, oceanDepth));
-                ocean = mix(ocean, oceanShallow, smoothstep(0.3, 0.6, oceanDepth));
-                ocean = mix(oceanBright, ocean, smoothstep(0.0, 0.15, oceanDepth));
+                ocean = mix(ocean, oceanMid, smoothstep(0.0, 0.4, oceanDepth));
+                ocean = mix(ocean, oceanShallow, smoothstep(0.4, 0.8, oceanDepth));
 
                 // Combine land and ocean
                 vec3 surfaceColor = mix(ocean, landColor, isLand);
 
                 // Add ice caps - polar regions
-                float iceCap = smoothstep(0.6, 0.8, latitude);
-                float iceOnLand = smoothstep(0.5, 0.7, latitude) * isLand;
-                surfaceColor = mix(surfaceColor, iceColor, max(iceCap * 0.95, iceOnLand * 0.85));
+                float iceCap = smoothstep(0.65, 0.85, latitude);
+                float iceOnLand = smoothstep(0.55, 0.75, latitude) * isLand;
+                surfaceColor = mix(surfaceColor, iceColor, max(iceCap * 0.9, iceOnLand * 0.8));
 
-                // Cloud layer (integrated into surface)
+                // Cloud layer - less dense
                 vec3 cloudPos = normalize(vPosition) * 2.0;
-                cloudPos.x += time * 0.02;
-                float clouds = snoise(cloudPos * 1.2);
-                clouds += snoise(cloudPos * 2.4) * 0.5;
-                clouds += snoise(cloudPos * 4.8) * 0.25;
-                clouds = smoothstep(0.1, 0.6, clouds);
+                cloudPos.x += time * 0.015;
+                float clouds = snoise(cloudPos * 1.0);
+                clouds += snoise(cloudPos * 2.0) * 0.5;
+                clouds += snoise(cloudPos * 4.0) * 0.25;
+                clouds = smoothstep(0.2, 0.7, clouds);
                 vec3 cloudColor = vec3(1.0, 1.0, 1.0);
-                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.45);
+                surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.3);
 
-                // Add atmosphere glow at edges
-                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.5);
-                vec3 atmosphereColor = vec3(0.4, 0.7, 1.0);
-                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.4);
+                // Add subtle atmosphere glow at edges only
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
+                vec3 atmosphereColor = vec3(0.5, 0.75, 1.0);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.2);
 
-                // Subtle rim light
-                surfaceColor += vec3(0.1, 0.15, 0.3) * fresnel;
+                // Very subtle rim light
+                surfaceColor += vec3(0.05, 0.08, 0.15) * fresnel;
 
                 // Sun lighting effect (simple directional)
                 vec3 sunDir = normalize(vec3(1.0, 0.3, 0.8));
                 float sunLight = max(0.0, dot(vNormal, sunDir));
-                surfaceColor *= 0.7 + sunLight * 0.4;
+                surfaceColor *= 0.75 + sunLight * 0.35;
 
                 gl_FragColor = vec4(surfaceColor, 1.0);
             }
