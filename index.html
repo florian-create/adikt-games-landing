@@ -1481,7 +1481,155 @@
         };
         img.src = 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/460x0w.webp';
 
-        // Debris removed to avoid white trail effect
+        // ============ DISTANT PLANETS ============
+        const distantPlanets = [];
+
+        // Mars-like red planet
+        const marsGeo = new THREE.SphereGeometry(0.8, 32, 32);
+        const marsMat = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 } },
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 baseColor = vec3(0.7, 0.3, 0.2);
+                    vec3 darkColor = vec3(0.4, 0.15, 0.1);
+                    float noise = fract(sin(dot(vPosition.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                    vec3 color = mix(darkColor, baseColor, noise * 0.5 + 0.5);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const mars = new THREE.Mesh(marsGeo, marsMat);
+        mars.userData = {
+            angle: 0,
+            radius: 45,
+            speed: 0.0004,
+            orbitTilt: 0.2,
+            rotationSpeed: 0.002
+        };
+        distantPlanets.push(mars);
+        scene.add(mars);
+
+        // Saturn-like ringed planet
+        const saturnGroup = new THREE.Group();
+        const saturnGeo = new THREE.SphereGeometry(1.2, 32, 32);
+        const saturnMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 color1 = vec3(0.9, 0.8, 0.6);
+                    vec3 color2 = vec3(0.8, 0.7, 0.5);
+                    float bands = sin(vPosition.y * 15.0) * 0.5 + 0.5;
+                    vec3 color = mix(color1, color2, bands);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const saturn = new THREE.Mesh(saturnGeo, saturnMat);
+        saturnGroup.add(saturn);
+
+        // Saturn rings
+        const ringGeo = new THREE.RingGeometry(1.6, 2.4, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xCCBB99,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2.2;
+        saturnGroup.add(ring);
+
+        saturnGroup.userData = {
+            angle: Math.PI,
+            radius: 60,
+            speed: 0.0002,
+            orbitTilt: -0.3,
+            rotationSpeed: 0.003
+        };
+        distantPlanets.push(saturnGroup);
+        scene.add(saturnGroup);
+
+        // Ice planet (blue/cyan)
+        const iceGeo = new THREE.SphereGeometry(0.5, 32, 32);
+        const iceMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 color1 = vec3(0.6, 0.85, 0.95);
+                    vec3 color2 = vec3(0.3, 0.6, 0.8);
+                    float pattern = sin(vPosition.x * 10.0 + vPosition.z * 10.0) * 0.5 + 0.5;
+                    vec3 color = mix(color1, color2, pattern);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const icePlanet = new THREE.Mesh(iceGeo, iceMat);
+        icePlanet.userData = {
+            angle: Math.PI / 2,
+            radius: 35,
+            speed: 0.0006,
+            orbitTilt: 0.5,
+            rotationSpeed: 0.004
+        };
+        distantPlanets.push(icePlanet);
+        scene.add(icePlanet);
+
+        // Purple gas giant
+        const purpleGeo = new THREE.SphereGeometry(1.0, 32, 32);
+        const purpleMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vec3 color1 = vec3(0.5, 0.3, 0.7);
+                    vec3 color2 = vec3(0.3, 0.2, 0.5);
+                    vec3 color3 = vec3(0.6, 0.4, 0.6);
+                    float bands = sin(vPosition.y * 12.0) * 0.5 + 0.5;
+                    float storm = sin(vPosition.x * 8.0 + vPosition.z * 8.0) * 0.3;
+                    vec3 color = mix(color1, color2, bands);
+                    color = mix(color, color3, storm * 0.5 + 0.25);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+        const purplePlanet = new THREE.Mesh(purpleGeo, purpleMat);
+        purplePlanet.userData = {
+            angle: Math.PI * 1.5,
+            radius: 52,
+            speed: 0.0003,
+            orbitTilt: -0.15,
+            rotationSpeed: 0.0025
+        };
+        distantPlanets.push(purplePlanet);
+        scene.add(purplePlanet)
 
         // ============ DIPLODOCUS herd walking together ============
         const dinosaurs = [];
@@ -1616,6 +1764,20 @@
 
             // Stars
             stars.rotation.y += 0.00006;
+
+            // Distant planets orbiting
+            distantPlanets.forEach(planet => {
+                const d = planet.userData;
+                d.angle += d.speed;
+
+                const x = Math.cos(d.angle) * d.radius;
+                const baseZ = Math.sin(d.angle) * d.radius;
+                const y = baseZ * Math.sin(d.orbitTilt);
+                const z = baseZ * Math.cos(d.orbitTilt);
+
+                planet.position.set(x, y, z);
+                planet.rotation.y += d.rotationSpeed;
+            });
 
             // App card orbit - ALWAYS facing camera
             if (appCard) {
