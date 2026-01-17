@@ -1142,7 +1142,7 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        // ============ ICY PLANET WITH GLOW ============
+        // ============ PLANET WITH CONTINENTS AND ICE ============
         const planetRadius = 7;
 
         const earthGeometry = new THREE.SphereGeometry(planetRadius, 128, 64);
@@ -1218,69 +1218,105 @@
             void main() {
                 vec3 pos = normalize(vPosition) * 1.5;
 
-                // Ice terrain noise
-                float terrain = snoise(pos * 0.8);
-                terrain += snoise(pos * 1.6) * 0.5;
-                terrain += snoise(pos * 3.2) * 0.25;
-                terrain += snoise(pos * 6.4) * 0.12;
+                // Continent noise
+                float continent = snoise(pos * 0.7);
+                continent += snoise(pos * 1.4) * 0.5;
+                continent += snoise(pos * 2.8) * 0.25;
+                continent += snoise(pos * 5.6) * 0.12;
 
-                // Ice colors - cyan to white
-                vec3 iceDeep = vec3(0.1, 0.3, 0.5);
-                vec3 iceMid = vec3(0.4, 0.7, 0.9);
-                vec3 iceLight = vec3(0.7, 0.9, 1.0);
-                vec3 iceWhite = vec3(0.95, 0.98, 1.0);
-                vec3 iceCrystal = vec3(0.6, 0.85, 1.0);
+                // Terrain detail
+                float terrainDetail = snoise(pos * 4.0);
 
-                // Frozen ocean - deep blue
-                vec3 frozenOcean = vec3(0.05, 0.15, 0.35);
-                vec3 frozenOceanMid = vec3(0.1, 0.25, 0.5);
-
-                // Glaciers and ice sheets
-                float iceLevel = smoothstep(-0.3, 0.4, terrain);
-
-                // Surface color based on terrain
-                vec3 surfaceColor = frozenOcean;
-                surfaceColor = mix(surfaceColor, frozenOceanMid, smoothstep(-0.5, -0.1, terrain));
-                surfaceColor = mix(surfaceColor, iceDeep, smoothstep(-0.1, 0.1, terrain));
-                surfaceColor = mix(surfaceColor, iceMid, smoothstep(0.1, 0.3, terrain));
-                surfaceColor = mix(surfaceColor, iceLight, smoothstep(0.3, 0.5, terrain));
-                surfaceColor = mix(surfaceColor, iceWhite, smoothstep(0.5, 0.7, terrain));
-
-                // Ice cracks - glowing cyan
-                float crackNoise = snoise(pos * 5.0);
-                float crackNoise2 = snoise(pos * 10.0);
-                float cracks = abs(crackNoise * crackNoise2);
-                cracks = 1.0 - smoothstep(0.0, 0.02, cracks);
-
-                // Glowing cracks
-                vec3 crackGlow = vec3(0.3, 0.8, 1.0);
-                surfaceColor = mix(surfaceColor, crackGlow, cracks * 0.8);
-
-                // Soft crack glow around
-                float softGlow = 1.0 - smoothstep(0.0, 0.08, abs(crackNoise * crackNoise2));
-                surfaceColor += crackGlow * softGlow * 0.3;
-
-                // Crystal shimmer
-                float shimmer = snoise(pos * 15.0 + time * 0.5);
-                shimmer = pow(max(0.0, shimmer), 3.0);
-                surfaceColor += iceCrystal * shimmer * 0.15;
-
-                // Aurora-like glow near poles
+                // Latitude for climate
                 float latitude = abs(vPosition.y / 7.0);
-                float aurora = smoothstep(0.5, 0.9, latitude);
-                vec3 auroraColor = mix(vec3(0.2, 0.8, 0.5), vec3(0.5, 0.3, 0.9), sin(time + pos.x * 3.0) * 0.5 + 0.5);
-                surfaceColor += auroraColor * aurora * 0.2;
+                float polarZone = smoothstep(0.5, 0.85, latitude);
+                float temperateZone = smoothstep(0.2, 0.5, latitude) * (1.0 - polarZone);
+
+                // Ocean colors
+                vec3 oceanDeep = vec3(0.02, 0.08, 0.22);
+                vec3 oceanMid = vec3(0.05, 0.18, 0.4);
+                vec3 oceanShallow = vec3(0.1, 0.3, 0.5);
+
+                // Land colors
+                vec3 beach = vec3(0.85, 0.78, 0.55);
+                vec3 grass = vec3(0.25, 0.5, 0.2);
+                vec3 forest = vec3(0.1, 0.35, 0.12);
+                vec3 tundra = vec3(0.5, 0.55, 0.45);
+                vec3 mountain = vec3(0.45, 0.4, 0.35);
+                vec3 snow = vec3(0.95, 0.97, 1.0);
+
+                // Ice colors
+                vec3 iceBlue = vec3(0.6, 0.85, 0.95);
+                vec3 iceWhite = vec3(0.92, 0.96, 1.0);
+                vec3 glacier = vec3(0.7, 0.88, 0.95);
+
+                // Land/ocean threshold
+                float landThreshold = -0.05;
+                float isLand = smoothstep(landThreshold - 0.03, landThreshold + 0.1, continent);
+
+                // Elevation
+                float elevation = max(0.0, (continent - landThreshold) * 2.0);
+
+                // Build ocean color
+                float oceanDepth = -continent + landThreshold;
+                vec3 ocean = oceanDeep;
+                ocean = mix(ocean, oceanMid, smoothstep(0.0, 0.4, oceanDepth));
+                ocean = mix(ocean, oceanShallow, smoothstep(0.4, 0.8, oceanDepth));
+
+                // Build land color based on elevation and climate
+                vec3 landColor = beach;
+                landColor = mix(landColor, grass, smoothstep(0.0, 0.15, elevation) * (1.0 - polarZone));
+                landColor = mix(landColor, forest, smoothstep(0.1, 0.3, elevation) * (1.0 - polarZone) * 0.7);
+                landColor = mix(landColor, tundra, temperateZone * 0.5 + polarZone * 0.3);
+                landColor = mix(landColor, mountain, smoothstep(0.35, 0.55, elevation));
+                landColor = mix(landColor, snow, smoothstep(0.5, 0.7, elevation));
+
+                // Combine land and ocean
+                vec3 surfaceColor = mix(ocean, landColor, isLand);
+
+                // Ice coverage - poles and high elevation
+                float iceNoise = snoise(pos * 3.0) * 0.3;
+                float iceCoverage = polarZone * 0.9 + smoothstep(0.4, 0.6, elevation) * 0.5;
+                iceCoverage += iceNoise * polarZone;
+                iceCoverage = clamp(iceCoverage, 0.0, 1.0);
+
+                // Sea ice in polar oceans
+                float seaIce = polarZone * (1.0 - isLand) * 0.85;
+                seaIce += iceNoise * 0.2;
+
+                // Apply ice
+                vec3 iceColor = mix(iceBlue, iceWhite, terrainDetail * 0.5 + 0.5);
+                iceColor = mix(iceColor, glacier, smoothstep(0.3, 0.6, elevation) * isLand);
+                surfaceColor = mix(surfaceColor, iceColor, max(iceCoverage * isLand, seaIce));
+
+                // Glowing ice cracks in glaciers
+                float crackNoise = snoise(pos * 8.0) * snoise(pos * 12.0);
+                float cracks = 1.0 - smoothstep(0.0, 0.015, abs(crackNoise));
+                cracks *= iceCoverage * 0.7;
+                vec3 crackGlow = vec3(0.4, 0.8, 1.0);
+                surfaceColor = mix(surfaceColor, crackGlow, cracks);
+
+                // Soft glow around cracks
+                float softCrackGlow = 1.0 - smoothstep(0.0, 0.06, abs(crackNoise));
+                surfaceColor += crackGlow * softCrackGlow * iceCoverage * 0.15;
+
+                // Clouds
+                vec3 cloudPos = normalize(vPosition) * 2.0;
+                cloudPos.x += time * 0.008;
+                float clouds = snoise(cloudPos * 1.2);
+                clouds += snoise(cloudPos * 2.4) * 0.5;
+                clouds = smoothstep(0.3, 0.75, clouds);
+                surfaceColor = mix(surfaceColor, vec3(1.0), clouds * 0.2);
 
                 // Sun lighting
                 vec3 sunDir = normalize(vec3(1.0, 0.3, 0.8));
                 float sunLight = max(0.0, dot(vNormal, sunDir));
-                surfaceColor *= 0.6 + sunLight * 0.5;
+                surfaceColor *= 0.65 + sunLight * 0.45;
 
-                // Strong fresnel glow - icy atmosphere
-                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.5);
-                vec3 atmosphereColor = vec3(0.4, 0.75, 1.0);
-                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.4);
-                surfaceColor += vec3(0.2, 0.5, 0.8) * fresnel * 0.3;
+                // Subtle fresnel atmosphere
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 3.0);
+                vec3 atmosphereColor = vec3(0.4, 0.7, 1.0);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.2);
 
                 gl_FragColor = vec4(surfaceColor, 1.0);
             }
@@ -1298,8 +1334,8 @@
         const earth = new THREE.Mesh(earthGeometry, earthMaterial);
         scene.add(earth);
 
-        // Inner atmosphere - bright cyan glow
-        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.08, 64, 32);
+        // Inner atmosphere glow
+        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.06, 64, 32);
         const atmosphereMaterial = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1311,9 +1347,9 @@
             fragmentShader: `
                 varying vec3 vNormal;
                 void main() {
-                    float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                    vec3 atmosphere = vec3(0.3, 0.7, 1.0) * intensity;
-                    gl_FragColor = vec4(atmosphere, intensity * 0.85);
+                    float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                    vec3 atmosphere = vec3(0.3, 0.65, 1.0) * intensity;
+                    gl_FragColor = vec4(atmosphere, intensity * 0.55);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1327,37 +1363,8 @@
         atmosphere.renderOrder = -5;
         scene.add(atmosphere);
 
-        // Middle glow - softer cyan
-        const midGlowGeo = new THREE.SphereGeometry(planetRadius * 1.18, 48, 32);
-        const midGlowMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                void main() {
-                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                    vec3 glow = vec3(0.25, 0.6, 0.95) * intensity;
-                    gl_FragColor = vec4(glow, intensity * 0.6);
-                }
-            `,
-            blending: THREE.AdditiveBlending,
-            side: THREE.BackSide,
-            transparent: true,
-            depthWrite: false,
-            depthTest: false
-        });
-
-        const midGlow = new THREE.Mesh(midGlowGeo, midGlowMat);
-        midGlow.renderOrder = -6;
-        scene.add(midGlow);
-
-        // Outer glow - diffuse halo
-        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.35, 32, 32);
+        // Outer glow - soft halo
+        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.18, 32, 32);
         const outerGlowMat = new THREE.ShaderMaterial({
             vertexShader: `
                 varying vec3 vNormal;
@@ -1369,9 +1376,9 @@
             fragmentShader: `
                 varying vec3 vNormal;
                 void main() {
-                    float intensity = pow(0.55 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
-                    vec3 glow = vec3(0.2, 0.5, 0.9) * intensity;
-                    gl_FragColor = vec4(glow, intensity * 0.35);
+                    float intensity = pow(0.58 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                    vec3 glow = vec3(0.2, 0.5, 0.85) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.25);
                 }
             `,
             blending: THREE.AdditiveBlending,
@@ -1382,7 +1389,7 @@
         });
 
         const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-        outerGlow.renderOrder = -7;
+        outerGlow.renderOrder = -6;
         scene.add(outerGlow);
 
         // Stars
