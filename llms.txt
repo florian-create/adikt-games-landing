@@ -1,23 +1,27 @@
 # Adikt Games
 
-> Mobile game studio creating addictive gaming experiences
+> Studio indépendant de jeux mobiles - Paris, France
 
-Adikt Games is a Paris-based mobile game studio focused on creating engaging mobile games with satisfying gameplay loops and reward systems.
+Adikt Games est un studio indépendant de jeux mobiles basé à Paris. Notre mission : créer des expériences de jeu captivantes avec des mécaniques addictives et des systèmes de récompenses satisfaisants.
 
-## About
+## Notre Vision
 
-Adikt Games develops mobile games for iOS and Android. Our focus is on creating games that players love to come back to, with carefully crafted mechanics that make every session enjoyable.
+Nous croyons que les meilleurs jeux mobiles sont ceux qui respectent le temps des joueurs tout en offrant des moments de plaisir authentiques. Chaque jeu que nous créons est conçu pour être accessible, engageant et gratifiant.
 
-## Games
+## Notre Expertise
+
+- **Game Design** : Mécaniques de jeu équilibrées et progression satisfaisante
+- **Mobile First** : Expériences optimisées pour iOS et Android
+- **Art & Animation** : Visuels soignés et animations fluides
+- **Monétisation Éthique** : Free-to-play respectueux des joueurs
+
+## Nos Jeux
 
 ### Pocket Car
 - **Platform**: iOS
 - **Genre**: Collection / Card Game
-- **Description**: The ultimate car collection game. Open booster packs, discover rare vehicles, and build your dream garage with legendary automobiles.
-- **Features**: 100+ cars, booster packs, rarity tiers, collection sets
+- **Description**: Collectionnez des voitures légendaires, ouvrez des boosters et complétez votre garage de rêve.
 - **App Store**: https://apps.apple.com/fr/app/pocket-car-collector/id6743163346
-- **Rating**: 5.0
-- **Price**: Free
 
 ## Contact
 
@@ -27,7 +31,7 @@ Adikt Games develops mobile games for iOS and Android. Our focus is on creating 
 
 ## Technical
 
-This website is built with:
+Website built with:
 - HTML5 / CSS3
 - Three.js for 3D WebGL animations
 - Web3Forms for contact handling
