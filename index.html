@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adikt Games | Mobile Game Studio</title>
+
+    <!-- SEO & App Store Optimization -->
+    <meta name="description" content="Adikt Games - Studio de jeux mobiles. Découvrez Pocket Car, le jeu de collection de voitures légendaires. Téléchargez gratuitement sur l'App Store.">
+    <meta name="keywords" content="Pocket Car, jeu mobile, collection voitures, card game, iOS game, Adikt Games, jeu gratuit, booster packs">
+    <meta name="author" content="Adikt Games">
+
+    <!-- Open Graph (Facebook, LinkedIn) -->
+    <meta property="og:title" content="Pocket Car - Collect Legendary Cars">
+    <meta property="og:description" content="Découvrez Pocket Car, le jeu de collection de voitures légendaires. Ouvrez des boosters, complétez votre collection !">
+    <meta property="og:image" content="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/1200x630wa.png">
+    <meta property="og:url" content="https://adiktgames.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pocket Car - Collect Legendary Cars">
+    <meta name="twitter:description" content="Le jeu de collection de voitures légendaires. Téléchargez gratuitement !">
+    <meta name="twitter:image" content="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/1200x630wa.png">
+
+    <!-- Apple Smart App Banner (shows "Open in App Store" on iOS Safari) -->
+    <meta name="apple-itunes-app" content="app-id=6743163346">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- App Links for deep linking -->
+    <link rel="alternate" href="ios-app://6743163346/pocketcar">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Structured Data for Google -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MobileApplication",
+        "name": "Pocket Car",
+        "operatingSystem": "iOS",
+        "applicationCategory": "GameApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "ratingCount": "7"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Adikt Games"
+        }
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6C5CE7;
+            --primary-light: #A29BFE;
+            --secondary: #00CEC9;
+            --accent: #FD79A8;
+            --dark: #0A0A12;
+            --darker: #050508;
+            --card-bg: rgba(255,255,255,0.03);
+            --text: #FFFFFF;
+            --text-muted: #6B6B80;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(
+                135deg,
+                #6C5CE7 0%,
+                #00CEC9 25%,
+                #FD79A8 50%,
+                #6C5CE7 75%,
+                #00CEC9 100%
+            );
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: holographic 8s ease-in-out infinite;
+        }
+
+        @keyframes holographic {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 100px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .header-cta {
+            background: var(--primary);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .header-cta:hover {
+            background: var(--primary-light);
+        }
+
+        /* ============ HERO ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 130px 20px 20px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            color: var(--primary-light);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hero h1 {
+            font-size: clamp(44px, 7vw, 80px);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 17px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Planet Container */
+        .planet-section {
+            flex: 1;
+            position: relative;
+            min-height: 700px;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            width: 100%;
+            height: calc(100% + 200px);
+            z-index: 10;
+        }
+
+        .planet-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle,
+                rgba(60, 140, 220, 0.2) 0%,
+                rgba(40, 100, 180, 0.15) 25%,
+                rgba(30, 70, 140, 0.08) 45%,
+                rgba(20, 50, 100, 0.03) 60%,
+                transparent 75%
+            );
+            pointer-events: none;
+            z-index: 0;
+            animation: glowPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #FFFFFF;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: bounce 2s infinite;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            width: 1px;
+            height: 30px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ============ GAMES SECTION ============ */
+        .games-section {
+            padding: 100px 60px;
+            position: relative;
+            background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-label {
+            display: inline-block;
+            color: var(--primary-light);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .section-header h2 {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        /* Game Card */
+        .game-showcase {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 28px;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .game-info {
+            position: relative;
+            z-index: 2;
+        }
+
+        .game-icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .game-tagline {
+            font-size: 16px;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .game-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .game-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .game-feature {
+            background: rgba(108, 92, 231, 0.12);
+            border: 1px solid rgba(108, 92, 231, 0.2);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .game-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .game-stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .app-store-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            color: black;
+            padding: 14px 28px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .app-store-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(255,255,255,0.15);
+        }
+
+        .app-store-btn svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        /* Phone Mockups */
+        .game-phones {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            perspective: 1000px;
+        }
+
+        .phone-mockup {
+            position: relative;
+            width: 220px;
+            height: 460px;
+            background: linear-gradient(145deg, #FFFFFF 0%, #E8E8E8 100%);
+            border-radius: 36px;
+            padding: 8px;
+            box-shadow:
+                0 40px 80px rgba(0,0,0,0.4),
+                0 0 0 1px rgba(255,255,255,0.3);
+            transition: transform 0.5s ease;
+        }
+
+        .phone-mockup:first-child {
+            transform: rotateY(6deg) rotateX(2deg);
+        }
+
+        .phone-mockup:last-child {
+            transform: rotateY(-6deg) rotateX(2deg);
+        }
+
+        .phone-mockup:hover {
+            transform: rotateY(0deg) rotateX(0deg) translateY(-8px) scale(1.02);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-screen video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 24px;
+            background: #1a1a1a;
+            border-radius: 16px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* ============ CONTACT SECTION ============ */
+        .contact-section {
+            padding: 100px 60px;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--darker) 100%);
+        }
+
+        .contact-container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .contact-header {
+            margin-bottom: 32px;
+        }
+
+        .contact-label {
+            display: inline-block;
+            color: var(--primary-light);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .contact-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            padding: 16px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:hover,
+        .form-group textarea:hover {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group textarea {
+            resize: none;
+            height: 120px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.25);
+            font-size: 13px;
+        }
+
+        .form-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            align-self: flex-start;
+            margin-top: 8px;
+        }
+
+        .form-submit:hover {
+            background: #5B4BD4;
+            transform: translateY(-1px);
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            padding: 40px 60px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #FFFFFF;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .game-card {
+                grid-template-columns: 1fr;
+                gap: 50px;
+                padding: 40px;
+            }
+
+            .game-phones {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 20px;
+            }
+
+            .logo-text {
+                font-size: 32px;
+            }
+
+            .nav-container {
+                padding: 4px 6px;
+            }
+
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .header-cta {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .hero-text {
+                padding: 110px 20px 10px;
+            }
+
+            .games-section, .contact-section {
+                padding: 60px 24px;
+            }
+
+            .game-phones {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .phone-mockup {
+                transform: none !important;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-form {
+                padding: 24px;
+            }
+
+            .footer {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="#" class="logo">
+            <span class="logo-text">Adikt Games</span>
+        </a>
+        <div class="nav-container">
+            <nav class="nav-links">
+                <a href="#games">Games</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <a href="#games" class="header-cta">Discover</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-text">
+            <div class="hero-badge">// Mobile Game Studio</div>
+            <h1>We Make Games<br><span class="gradient">Players Love</span></h1>
+            <p class="hero-subtitle">Crafting engaging mobile experiences with addictive gameplay loops and satisfying reward systems.</p>
+        </div>
+
+        <div class="planet-section">
+            <div class="planet-glow"></div>
+            <div id="canvas-container"></div>
+            <div class="scroll-indicator">Explore</div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section class="games-section" id="games">
+        <div class="section-header">
+            <span class="section-label">// Now Available</span>
+            <h2>Our Games</h2>
+            <p>Experiences designed to keep you coming back.</p>
+        </div>
+
+        <div class="game-showcase">
+            <div class="game-card">
+                <div class="game-info">
+                    <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/460x0w.webp" alt="Pocket Car" class="game-icon">
+                    <h3 class="game-title">Pocket Car</h3>
+                    <p class="game-tagline">Collect Legendary Cars in Your Pocket</p>
+                    <p class="game-description">
+                        The ultimate car collection game. Open booster packs, discover rare vehicles,
+                        and build your dream garage with legendary automobiles from classic muscle to modern supercars.
+                    </p>
+
+                    <div class="game-features">
+                        <span class="game-feature">100+ Cars</span>
+                        <span class="game-feature">Booster Packs</span>
+                        <span class="game-feature">Rarity Tiers</span>
+                        <span class="game-feature">Collection Sets</span>
+                    </div>
+
+                    <div class="game-stats">
+                        <div class="game-stat">
+                            <div class="game-stat-value">5.0</div>
+                            <div class="game-stat-label">Rating</div>
+                        </div>
+                        <div class="game-stat">
+                            <div class="game-stat-value">4+</div>
+                            <div class="game-stat-label">Age</div>
+                        </div>
+                        <div class="game-stat">
+                            <div class="game-stat-value">Free</div>
+                            <div class="game-stat-label">Download</div>
+                        </div>
+                    </div>
+
+                    <a href="https://apps.apple.com/fr/app/pocket-car-collector/id6743163346" class="app-store-btn" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                        </svg>
+                        Download on App Store
+                    </a>
+                </div>
+
+                <div class="game-phones">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            <video autoplay muted loop playsinline>
+                                <source src="demo1.mov" type="video/quicktime">
+                                <source src="demo1.mov" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            <video autoplay muted loop playsinline>
+                                <source src="demo2.mov" type="video/quicktime">
+                                <source src="demo2.mov" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="contact-container">
+            <div class="contact-header">
+                <span class="contact-label">// Contact</span>
+                <h2>Let's build something</h2>
+            </div>
+
+            <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="0f651930-1b35-4b75-ad81-f24e87380020">
+                <input type="hidden" name="subject" value="New Contact from Adikt Games">
+                <input type="hidden" name="from_name" value="Adikt Games Website">
+                <input type="hidden" name="redirect" value="https://web3forms.com/success">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" placeholder="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="form-subject" name="custom_subject" placeholder="Subject">
+                </div>
+
+                <div class="form-group">
+                    <textarea id="message" name="message" placeholder="Message" required></textarea>
+                </div>
+
+                <button type="submit" class="form-submit">Send →</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">// 2025 Adikt Games — Paris</div>
+        <div class="footer-links">
+            <a href="https://fkyle742446.github.io/pocket-car-assistance/" target="_blank">Privacy</a>
+            <a href="mailto:cailles.florian@gmail.com">Email</a>
+        </div>
+    </footer>
+
+    <!-- Three.js Animation -->
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // ============ EARTH-LIKE PLANET ============
+        const planetRadius = 7;
+
+        // Create Earth with procedural continents
+        const earthGeometry = new THREE.SphereGeometry(planetRadius, 128, 64);
+
+        // Custom shader for Earth
+        const earthVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const earthFragmentShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+
+            // Simplex noise functions
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+            float snoise(vec3 v) {
+                const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i = floor(v + dot(v, C.yyy));
+                vec3 x0 = v - i + dot(i, C.xxx);
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min(g.xyz, l.zxy);
+                vec3 i2 = max(g.xyz, l.zxy);
+                vec3 x1 = x0 - i1 + C.xxx;
+                vec3 x2 = x0 - i2 + C.yyy;
+                vec3 x3 = x0 - D.yyy;
+                i = mod289(i);
+                vec4 p = permute(permute(permute(
+                    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                float n_ = 0.142857142857;
+                vec3 ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_);
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4(x.xy, y.xy);
+                vec4 b1 = vec4(x.zw, y.zw);
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                vec3 p0 = vec3(a0.xy, h.x);
+                vec3 p1 = vec3(a0.zw, h.y);
+                vec3 p2 = vec3(a1.xy, h.z);
+                vec3 p3 = vec3(a1.zw, h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+            }
+
+            void main() {
+                // Generate continent noise - more defined
+                vec3 pos = normalize(vPosition) * 1.5;
+                float continent = snoise(pos * 1.0);
+                continent += snoise(pos * 2.0) * 0.5;
+                continent += snoise(pos * 4.0) * 0.25;
+                continent += snoise(pos * 8.0) * 0.1;
+
+                // Ocean colors (vibrant blue)
+                vec3 oceanDeep = vec3(0.01, 0.05, 0.2);
+                vec3 oceanMid = vec3(0.02, 0.12, 0.35);
+                vec3 oceanShallow = vec3(0.05, 0.2, 0.5);
+
+                // Land colors - more saturated
+                vec3 landGreen = vec3(0.1, 0.4, 0.15);
+                vec3 landForest = vec3(0.05, 0.25, 0.1);
+                vec3 landBrown = vec3(0.35, 0.25, 0.12);
+                vec3 landDesert = vec3(0.6, 0.5, 0.3);
+
+                // Ice caps
+                float latitude = abs(vPosition.y / 7.0);
+                vec3 iceColor = vec3(0.95, 0.97, 1.0);
+
+                // Sharper land/ocean boundary
+                float landThreshold = 0.05;
+                float isLand = smoothstep(landThreshold - 0.05, landThreshold + 0.08, continent);
+
+                // Varied terrain on land
+                float terrainNoise = snoise(pos * 5.0);
+                float elevation = snoise(pos * 3.0);
+                vec3 landColor = mix(landForest, landGreen, smoothstep(-0.3, 0.2, terrainNoise));
+                landColor = mix(landColor, landBrown, smoothstep(0.2, 0.5, terrainNoise));
+                // Add desert near equator
+                float equator = 1.0 - abs(vPosition.y / 7.0);
+                landColor = mix(landColor, landDesert, smoothstep(0.3, 0.6, terrainNoise) * equator * 0.7);
+
+                // Ocean depth variation
+                vec3 ocean = mix(oceanDeep, oceanMid, smoothstep(-0.6, -0.2, continent));
+                ocean = mix(ocean, oceanShallow, smoothstep(-0.1, 0.05, continent));
+
+                // Combine land and ocean
+                vec3 surfaceColor = mix(ocean, landColor, isLand);
+
+                // Add ice caps - polar regions
+                float iceCap = smoothstep(0.65, 0.85, latitude);
+                surfaceColor = mix(surfaceColor, iceColor, iceCap * 0.9);
+
+                // Add atmosphere glow at edges
+                float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
+                vec3 atmosphereColor = vec3(0.4, 0.65, 1.0);
+                surfaceColor = mix(surfaceColor, atmosphereColor, fresnel * 0.35);
+
+                // Subtle rim light
+                surfaceColor += vec3(0.08, 0.12, 0.25) * fresnel;
+
+                gl_FragColor = vec4(surfaceColor, 1.0);
+            }
+        `;
+
+        const earthMaterial = new THREE.ShaderMaterial({
+            vertexShader: earthVertexShader,
+            fragmentShader: earthFragmentShader,
+            transparent: false
+        });
+
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earth);
+
+        // Atmosphere glow - enhanced blue aura
+        const atmosphereGeometry = new THREE.SphereGeometry(planetRadius * 1.12, 64, 32);
+        const atmosphereMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    vec3 atmosphere = vec3(0.35, 0.65, 1.0) * intensity;
+                    gl_FragColor = vec4(atmosphere, intensity * 0.7);
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true
+        });
+
+        const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+        scene.add(atmosphere);
+
+        // Outer glow layer - softer blue halo
+        const outerGlowGeo = new THREE.SphereGeometry(planetRadius * 1.25, 32, 32);
+        const outerGlowMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+                    vec3 glow = vec3(0.2, 0.5, 0.9) * intensity;
+                    gl_FragColor = vec4(glow, intensity * 0.3);
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true
+        });
+
+        const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
+        scene.add(outerGlow);
+
+        // Clouds layer - more visible
+        const cloudsGeometry = new THREE.SphereGeometry(planetRadius * 1.025, 64, 32);
+        const cloudsMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+                float snoise(vec3 v) {
+                    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                    vec3 i = floor(v + dot(v, C.yyy));
+                    vec3 x0 = v - i + dot(i, C.xxx);
+                    vec3 g = step(x0.yzx, x0.xyz);
+                    vec3 l = 1.0 - g;
+                    vec3 i1 = min(g.xyz, l.zxy);
+                    vec3 i2 = max(g.xyz, l.zxy);
+                    vec3 x1 = x0 - i1 + C.xxx;
+                    vec3 x2 = x0 - i2 + C.yyy;
+                    vec3 x3 = x0 - D.yyy;
+                    i = mod289(i);
+                    vec4 p = permute(permute(permute(
+                        i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                        + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                        + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                    float n_ = 0.142857142857;
+                    vec3 ns = n_ * D.wyz - D.xzx;
+                    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                    vec4 x_ = floor(j * ns.z);
+                    vec4 y_ = floor(j - 7.0 * x_);
+                    vec4 x = x_ *ns.x + ns.yyyy;
+                    vec4 y = y_ *ns.x + ns.yyyy;
+                    vec4 h = 1.0 - abs(x) - abs(y);
+                    vec4 b0 = vec4(x.xy, y.xy);
+                    vec4 b1 = vec4(x.zw, y.zw);
+                    vec4 s0 = floor(b0)*2.0 + 1.0;
+                    vec4 s1 = floor(b1)*2.0 + 1.0;
+                    vec4 sh = -step(h, vec4(0.0));
+                    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                    vec3 p0 = vec3(a0.xy, h.x);
+                    vec3 p1 = vec3(a0.zw, h.y);
+                    vec3 p2 = vec3(a1.xy, h.z);
+                    vec3 p3 = vec3(a1.zw, h.w);
+                    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+                    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                    m = m * m;
+                    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+                }
+
+                void main() {
+                    vec3 pos = normalize(vPosition) * 2.0;
+                    float clouds = snoise(pos * 1.5);
+                    clouds += snoise(pos * 3.0) * 0.5;
+                    clouds += snoise(pos * 6.0) * 0.25;
+                    clouds = smoothstep(0.0, 0.7, clouds);
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, clouds * 0.55);
+                }
+            `,
+            transparent: true,
+            depthWrite: false
+        });
+
+        const clouds = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
+        scene.add(clouds);
+
+
+        // Stars
+        const starsGeometry = new THREE.BufferGeometry();
+        const starCount = 2500;
+        const starPositions = new Float32Array(starCount * 3);
+
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i * 3] = (Math.random() - 0.5) * 200;
+            starPositions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+            starPositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+        }
+
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const stars = new THREE.Points(
+            starsGeometry,
+            new THREE.PointsMaterial({ size: 0.05, color: 0xffffff, transparent: true, opacity: 0.6 })
+        );
+        scene.add(stars);
+
+        // ============ APP CARD - ALWAYS FACING FRONT ============
+        let appCard = null;
+
+        // Load icon and create rounded texture
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            // Create rounded corners canvas
+            const canvas = document.createElement('canvas');
+            const size = 512;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Rounded rectangle clip
+            const radius = size * 0.22;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(img, 0, 0, size, size);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+
+            appCard = new THREE.Group();
+
+            const cardSize = 1.5;
+            const cardDepth = 0.18;
+            const cornerRadius = 0.32;
+
+            // Create rounded rectangle shape
+            const createRoundedRect = (w, h, r) => {
+                const shape = new THREE.Shape();
+                shape.moveTo(-w/2 + r, -h/2);
+                shape.lineTo(w/2 - r, -h/2);
+                shape.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
+                shape.lineTo(w/2, h/2 - r);
+                shape.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
+                shape.lineTo(-w/2 + r, h/2);
+                shape.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
+                shape.lineTo(-w/2, -h/2 + r);
+                shape.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
+                return shape;
+            };
+
+            // Card body with bevel
+            const cardShape = createRoundedRect(cardSize, cardSize, cornerRadius);
+            const cardGeo = new THREE.ExtrudeGeometry(cardShape, {
+                depth: cardDepth,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.03,
+                bevelSegments: 2
+            });
+            const cardMat = new THREE.MeshBasicMaterial({ color: 0xE0E0E0 });
+            const card = new THREE.Mesh(cardGeo, cardMat);
+            card.position.z = -cardDepth / 2;
+            appCard.add(card);
+
+            // White front face
+            const faceGeo = new THREE.ShapeGeometry(createRoundedRect(cardSize - 0.04, cardSize - 0.04, cornerRadius - 0.02));
+            const faceMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+            const face = new THREE.Mesh(faceGeo, faceMat);
+            face.position.z = cardDepth / 2 + 0.035;
+            appCard.add(face);
+
+            // App icon - ROUNDED and VISIBLE
+            const iconSize = cardSize - 0.15;
+            const iconGeo = new THREE.PlaneGeometry(iconSize, iconSize);
+            const iconMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+            const icon = new THREE.Mesh(iconGeo, iconMat);
+            icon.position.z = cardDepth / 2 + 0.04;
+            appCard.add(icon);
+
+            // Orbit data
+            appCard.userData = {
+                angle: 0,
+                radius: planetRadius + 1.8,
+                speed: 0.003,
+                orbitTilt: Math.PI / 3
+            };
+
+
+            scene.add(appCard);
+        };
+        img.src = 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/460x0w.webp';
+
+        // Small particles / satellites with varied orbits
+        const debris = [];
+        for (let i = 0; i < 10; i++) {
+            const size = 0.04 + Math.random() * 0.08;
+            const debrisGeo = new THREE.SphereGeometry(size, 8, 8);
+            const colors = [0xCCEEFF, 0xFFFFFF, 0xE0E0E0];
+            const debrisMat = new THREE.MeshBasicMaterial({
+                color: colors[Math.floor(Math.random() * colors.length)],
+                transparent: true,
+                opacity: 0.5 + Math.random() * 0.3
+            });
+            const piece = new THREE.Mesh(debrisGeo, debrisMat);
+
+            piece.userData = {
+                angle: Math.random() * Math.PI * 2,
+                baseRadius: planetRadius + 0.8 + Math.random() * 1.5,
+                speed: 0.003 + Math.random() * 0.004,
+                // Individual orbit tilts for variety
+                orbitTiltX: Math.PI / 3 + (Math.random() - 0.5) * 0.8,
+                orbitTiltY: (Math.random() - 0.5) * 0.5,
+                // Wobble
+                wobbleAmp: Math.random() * 0.2,
+                wobbleFreq: 1 + Math.random() * 2,
+                wobblePhase: Math.random() * Math.PI * 2
+            };
+
+            debris.push(piece);
+            scene.add(piece);
+        }
+
+        // ============ DIPLODOCUS herd walking together ============
+        const dinosaurs = [];
+        const dinoBasePhi = Math.PI * 0.45;
+        const dinoBaseTheta = Math.PI * 0.6;
+
+        for (let i = 0; i < 5; i++) {
+            const dinoGroup = new THREE.Group();
+            const dinoColor = 0x558844;
+            const dinoMat = new THREE.MeshBasicMaterial({ color: dinoColor });
+
+            // Body (oval)
+            const bodyGeo = new THREE.SphereGeometry(0.04, 6, 6);
+            bodyGeo.scale(1.2, 0.8, 0.8);
+            const body = new THREE.Mesh(bodyGeo, dinoMat);
+            dinoGroup.add(body);
+
+            // Long neck
+            const neckGeo = new THREE.CylinderGeometry(0.012, 0.018, 0.1, 4);
+            const neck = new THREE.Mesh(neckGeo, dinoMat);
+            neck.rotation.z = -Math.PI / 3;
+            neck.position.set(0.05, 0.04, 0);
+            dinoGroup.add(neck);
+
+            // Small head
+            const headGeo = new THREE.SphereGeometry(0.015, 4, 4);
+            const head = new THREE.Mesh(headGeo, dinoMat);
+            head.position.set(0.1, 0.08, 0);
+            dinoGroup.add(head);
+
+            // Long tail
+            const tailGeo = new THREE.CylinderGeometry(0.005, 0.018, 0.12, 4);
+            const tail = new THREE.Mesh(tailGeo, dinoMat);
+            tail.rotation.z = Math.PI / 2.5;
+            tail.position.set(-0.08, 0.02, 0);
+            dinoGroup.add(tail);
+
+            // 4 legs
+            for (let l = 0; l < 4; l++) {
+                const legGeo = new THREE.CylinderGeometry(0.006, 0.008, 0.035, 4);
+                const leg = new THREE.Mesh(legGeo, dinoMat);
+                leg.position.x = (l < 2 ? 0.025 : -0.025);
+                leg.position.z = (l % 2 === 0 ? 0.02 : -0.02);
+                leg.position.y = -0.025;
+                dinoGroup.add(leg);
+            }
+
+            // Scale down - very tiny
+            dinoGroup.scale.setScalar(0.6);
+
+            dinoGroup.userData = {
+                theta: dinoBaseTheta + i * 0.08,
+                phi: dinoBasePhi + (Math.random() - 0.5) * 0.15,
+                walkSpeed: 0.0004,
+                walkPhase: i * 0.5
+            };
+
+            dinosaurs.push(dinoGroup);
+            scene.add(dinoGroup);
+        }
+
+        // ============ ARMIES fighting ============
+        const soldiers = [];
+        const armyBasePhi = Math.PI * 0.55;
+        const armyBaseTheta = Math.PI * 1.4;
+
+        for (let army = 0; army < 2; army++) {
+            const color = army === 0 ? 0xCC3333 : 0x3333CC;
+            const offsetTheta = army === 0 ? -0.12 : 0.12;
+
+            for (let i = 0; i < 6; i++) {
+                const soldierGroup = new THREE.Group();
+
+                const bodyGeo = new THREE.BoxGeometry(0.02, 0.035, 0.015);
+                const bodyMat = new THREE.MeshBasicMaterial({ color: color });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                soldierGroup.add(body);
+
+                const headGeo = new THREE.SphereGeometry(0.01, 4, 4);
+                const head = new THREE.Mesh(headGeo, bodyMat);
+                head.position.y = 0.025;
+                soldierGroup.add(head);
+
+                soldierGroup.scale.setScalar(0.7);
+
+                soldierGroup.userData = {
+                    theta: armyBaseTheta + offsetTheta + (Math.random() - 0.5) * 0.15,
+                    phi: armyBasePhi + (Math.random() - 0.5) * 0.2,
+                    army: army,
+                    chargeSpeed: 0.0003 + Math.random() * 0.0005,
+                    wobble: Math.random() * Math.PI * 2
+                };
+
+                soldiers.push(soldierGroup);
+                scene.add(soldierGroup);
+            }
+        }
+
+        // Camera
+        camera.position.z = 26;
+        camera.position.y = 3;
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let camX = 0;
+        let camY = 3;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Animation
+        let time = 0;
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+            time += 0.016;
+
+            // Camera
+            camX += (mouseX * 4 - camX) * 0.02;
+            camY += (mouseY * 2.5 + 3 - camY) * 0.02;
+            camera.position.x = camX;
+            camera.position.y = camY;
+            camera.lookAt(0, 0, 0);
+
+            // Earth rotation
+            earth.rotation.y += 0.0008;
+            clouds.rotation.y += 0.001;
+            atmosphere.rotation.y += 0.0003;
+
+
+            // Stars
+            stars.rotation.y += 0.00006;
+
+            // App card orbit - ALWAYS facing camera
+            if (appCard) {
+                const data = appCard.userData;
+
+                // Slow orbit
+                data.angle += data.speed;
+
+                // Orbit position
+                const radius = data.radius;
+                const tilt = data.orbitTilt;
+
+                // Calculate position on tilted orbit
+                const x = Math.cos(data.angle) * radius;
+                const baseZ = Math.sin(data.angle) * radius;
+                const y = baseZ * Math.sin(tilt);
+                const z = baseZ * Math.cos(tilt);
+
+                appCard.position.set(x, y, z);
+
+                // ALWAYS face the camera (billboard effect)
+                appCard.lookAt(camera.position);
+
+                // Slight tilt to show 3D depth while keeping logo visible
+                appCard.rotation.x += 0.1;
+            }
+
+            // Debris with varied 3D orbits
+            debris.forEach(piece => {
+                const d = piece.userData;
+                d.angle += d.speed;
+
+                // Wobbling radius
+                const wobble = Math.sin(d.angle * d.wobbleFreq + d.wobblePhase) * d.wobbleAmp;
+                const radius = d.baseRadius + wobble;
+
+                // 3D orbit with individual tilts
+                const x = Math.cos(d.angle) * radius;
+                const z = Math.sin(d.angle) * radius;
+
+                // Apply orbit tilts
+                piece.position.x = x * Math.cos(d.orbitTiltY) - z * Math.sin(d.orbitTiltY);
+                piece.position.z = (x * Math.sin(d.orbitTiltY) + z * Math.cos(d.orbitTiltY)) * Math.cos(d.orbitTiltX);
+                piece.position.y = (x * Math.sin(d.orbitTiltY) + z * Math.cos(d.orbitTiltY)) * Math.sin(d.orbitTiltX);
+            });
+
+            // Animate dinosaurs walking on planet
+            dinosaurs.forEach(dino => {
+                const d = dino.userData;
+                const r = planetRadius * 1.02;
+
+                // Walk around
+                d.theta += d.walkSpeed * d.direction;
+
+                // Apply earth rotation
+                const earthRotation = earth.rotation.y;
+                const theta = d.theta + earthRotation;
+                const phi = d.phi;
+
+                // Position on surface
+                dino.position.x = r * Math.sin(phi) * Math.cos(theta);
+                dino.position.y = r * Math.cos(phi);
+                dino.position.z = r * Math.sin(phi) * Math.sin(theta);
+
+                // Orient to surface (feet down, facing walk direction)
+                dino.lookAt(0, 0, 0);
+                dino.rotateX(Math.PI / 2);
+                dino.rotateY(d.direction > 0 ? 0 : Math.PI);
+
+                // Walking bob
+                dino.position.y += Math.abs(Math.sin(time * 8 + d.walkPhase)) * 0.02;
+            });
+
+            // Animate soldiers battling
+            soldiers.forEach(soldier => {
+                const d = soldier.userData;
+                const r = planetRadius * 1.015;
+
+                const chargeDir = d.army === 0 ? 1 : -1;
+                d.theta += d.chargeSpeed * chargeDir;
+
+                const earthRotation = earth.rotation.y;
+                const theta = d.theta + earthRotation;
+                const phi = d.phi;
+
+                soldier.position.x = r * Math.sin(phi) * Math.cos(theta);
+                soldier.position.y = r * Math.cos(phi);
+                soldier.position.z = r * Math.sin(phi) * Math.sin(theta);
+
+                soldier.lookAt(0, 0, 0);
+                soldier.rotateX(Math.PI / 2);
+                soldier.rotateY(chargeDir > 0 ? Math.PI / 2 : -Math.PI / 2);
+
+                soldier.position.y += Math.abs(Math.sin(time * 10 + d.wobble)) * 0.01;
+            });
+
+            renderer.render(scene, camera);
+        };
+
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# Adikt Games
+
+> Mobile game studio creating addictive gaming experiences
+
+Adikt Games is a Paris-based mobile game studio focused on creating engaging mobile games with satisfying gameplay loops and reward systems.
+
+## About
+
+Adikt Games develops mobile games for iOS and Android. Our focus is on creating games that players love to come back to, with carefully crafted mechanics that make every session enjoyable.
+
+## Games
+
+### Pocket Car
+- **Platform**: iOS
+- **Genre**: Collection / Card Game
+- **Description**: The ultimate car collection game. Open booster packs, discover rare vehicles, and build your dream garage with legendary automobiles.
+- **Features**: 100+ cars, booster packs, rarity tiers, collection sets
+- **App Store**: https://apps.apple.com/fr/app/pocket-car-collector/id6743163346
+- **Rating**: 5.0
+- **Price**: Free
+
+## Contact
+
+- **Location**: Paris, France
+- **Email**: cailles.florian@gmail.com
+- **Website**: https://adiktgames.com
+
+## Technical
+
+This website is built with:
+- HTML5 / CSS3
+- Three.js for 3D WebGL animations
+- Web3Forms for contact handling
+- Deployed on Cloudflare Pages
