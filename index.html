@@ -560,10 +560,66 @@
             margin-bottom: 0;
         }
 
+        .contact-form-wrapper {
+            position: relative;
+            padding: 3px;
+            border-radius: 16px;
+            background: linear-gradient(
+                90deg,
+                rgba(108, 92, 231, 0.8) 0%,
+                rgba(0, 206, 201, 0.8) 25%,
+                rgba(253, 121, 168, 0.8) 50%,
+                rgba(108, 92, 231, 0.8) 75%,
+                rgba(0, 206, 201, 0.8) 100%
+            );
+            background-size: 300% 100%;
+            animation: shiningBorder 4s linear infinite;
+            box-shadow:
+                0 0 20px rgba(108, 92, 231, 0.3),
+                0 0 40px rgba(0, 206, 201, 0.2),
+                0 0 60px rgba(253, 121, 168, 0.1);
+        }
+
+        .contact-form-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 16px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 45%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.4) 55%,
+                transparent 100%
+            );
+            background-size: 200% 100%;
+            animation: shineEffect 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shiningBorder {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        @keyframes shineEffect {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+
         .contact-form {
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background: var(--darker);
+            border-radius: 13px;
+            padding: 32px;
+            position: relative;
+            z-index: 1;
         }
 
         .form-row {
@@ -681,11 +737,12 @@
 
         @media (max-width: 768px) {
             .header {
-                padding: 12px 20px;
+                padding: 12px 16px;
             }
 
             .logo-text {
-                font-size: 32px;
+                font-size: 26px;
+                letter-spacing: -1px;
             }
 
             .nav-container {
@@ -703,34 +760,175 @@
             }
 
             .hero-text {
-                padding: 110px 20px 10px;
+                padding: 100px 16px 10px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+                letter-spacing: -1px;
+            }
+
+            .hero-subtitle {
+                font-size: 15px;
+            }
+
+            .planet-section {
+                min-height: 500px;
+            }
+
+            .planet-glow {
+                width: 400px;
+                height: 400px;
+            }
+
+            .scroll-indicator {
+                bottom: -20px;
+                font-size: 10px;
             }
 
             .games-section, .contact-section {
-                padding: 60px 24px;
+                padding: 60px 16px;
+            }
+
+            .section-header h2 {
+                font-size: 32px;
+            }
+
+            .game-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+
+            .game-title {
+                font-size: 28px;
             }
 
             .game-phones {
                 flex-direction: column;
                 align-items: center;
+                gap: 20px;
             }
 
             .phone-mockup {
                 transform: none !important;
+                width: 180px;
+                height: 380px;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
             }
 
+            .contact-form-wrapper {
+                padding: 2px;
+                border-radius: 12px;
+            }
+
             .contact-form {
-                padding: 24px;
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .contact-header h2 {
+                font-size: 22px;
             }
 
             .footer {
                 flex-direction: column;
                 text-align: center;
-                padding: 30px 24px;
+                padding: 30px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px 12px;
+            }
+
+            .logo-text {
+                font-size: 22px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero-subtitle {
+                font-size: 14px;
+            }
+
+            .planet-section {
+                min-height: 400px;
+            }
+
+            .planet-glow {
+                width: 300px;
+                height: 300px;
+            }
+
+            .game-icon {
+                width: 64px;
+                height: 64px;
+                border-radius: 16px;
+            }
+
+            .game-title {
+                font-size: 24px;
+            }
+
+            .game-description {
+                font-size: 14px;
+            }
+
+            .game-features {
+                gap: 8px;
+            }
+
+            .game-feature {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .game-stats {
+                gap: 20px;
+            }
+
+            .game-stat-value {
+                font-size: 22px;
+            }
+
+            .phone-mockup {
+                width: 160px;
+                height: 340px;
+                border-radius: 28px;
+            }
+
+            .phone-screen {
+                border-radius: 22px;
+            }
+
+            .app-store-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+
+            .contact-form {
+                padding: 16px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 14px;
+                font-size: 14px;
+            }
+
+            .form-submit {
+                width: 100%;
+                padding: 14px;
             }
         }
     </style>
@@ -844,31 +1042,33 @@
                 <h2>Let's build something</h2>
             </div>
 
-            <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-                <input type="hidden" name="access_key" value="0f651930-1b35-4b75-ad81-f24e87380020">
-                <input type="hidden" name="subject" value="New Contact from Adikt Games">
-                <input type="hidden" name="from_name" value="Adikt Games Website">
-                <input type="hidden" name="redirect" value="https://web3forms.com/success">
+            <div class="contact-form-wrapper">
+                <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                    <input type="hidden" name="access_key" value="0f651930-1b35-4b75-ad81-f24e87380020">
+                    <input type="hidden" name="subject" value="New Contact from Adikt Games">
+                    <input type="hidden" name="from_name" value="Adikt Games Website">
+                    <input type="hidden" name="redirect" value="https://web3forms.com/success">
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <input type="text" id="name" name="name" placeholder="Name" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" placeholder="Email" required>
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <input type="email" id="email" name="email" placeholder="Email" required>
+                        <input type="text" id="form-subject" name="custom_subject" placeholder="Subject">
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <input type="text" id="form-subject" name="custom_subject" placeholder="Subject">
-                </div>
+                    <div class="form-group">
+                        <textarea id="message" name="message" placeholder="Message" required></textarea>
+                    </div>
 
-                <div class="form-group">
-                    <textarea id="message" name="message" placeholder="Message" required></textarea>
-                </div>
-
-                <button type="submit" class="form-submit">Send →</button>
-            </form>
+                    <button type="submit" class="form-submit">Send →</button>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -1281,35 +1481,7 @@
         };
         img.src = 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/4c/a9/e34ca935-77f7-b771-3b5c-3bf2dba48ec6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/460x0w.webp';
 
-        // Small particles / satellites with varied orbits
-        const debris = [];
-        for (let i = 0; i < 10; i++) {
-            const size = 0.04 + Math.random() * 0.08;
-            const debrisGeo = new THREE.SphereGeometry(size, 8, 8);
-            const colors = [0xCCEEFF, 0xFFFFFF, 0xE0E0E0];
-            const debrisMat = new THREE.MeshBasicMaterial({
-                color: colors[Math.floor(Math.random() * colors.length)],
-                transparent: true,
-                opacity: 0.5 + Math.random() * 0.3
-            });
-            const piece = new THREE.Mesh(debrisGeo, debrisMat);
-
-            piece.userData = {
-                angle: Math.random() * Math.PI * 2,
-                baseRadius: planetRadius + 0.8 + Math.random() * 1.5,
-                speed: 0.003 + Math.random() * 0.004,
-                // Individual orbit tilts for variety
-                orbitTiltX: Math.PI / 3 + (Math.random() - 0.5) * 0.8,
-                orbitTiltY: (Math.random() - 0.5) * 0.5,
-                // Wobble
-                wobbleAmp: Math.random() * 0.2,
-                wobbleFreq: 1 + Math.random() * 2,
-                wobblePhase: Math.random() * Math.PI * 2
-            };
-
-            debris.push(piece);
-            scene.add(piece);
-        }
+        // Debris removed to avoid white trail effect
 
         // ============ DIPLODOCUS herd walking together ============
         const dinosaurs = [];
@@ -1471,24 +1643,6 @@
                 appCard.rotation.x += 0.1;
             }
 
-            // Debris with varied 3D orbits
-            debris.forEach(piece => {
-                const d = piece.userData;
-                d.angle += d.speed;
-
-                // Wobbling radius
-                const wobble = Math.sin(d.angle * d.wobbleFreq + d.wobblePhase) * d.wobbleAmp;
-                const radius = d.baseRadius + wobble;
-
-                // 3D orbit with individual tilts
-                const x = Math.cos(d.angle) * radius;
-                const z = Math.sin(d.angle) * radius;
-
-                // Apply orbit tilts
-                piece.position.x = x * Math.cos(d.orbitTiltY) - z * Math.sin(d.orbitTiltY);
-                piece.position.z = (x * Math.sin(d.orbitTiltY) + z * Math.cos(d.orbitTiltY)) * Math.cos(d.orbitTiltX);
-                piece.position.y = (x * Math.sin(d.orbitTiltY) + z * Math.cos(d.orbitTiltY)) * Math.sin(d.orbitTiltX);
-            });
 
             // Animate dinosaurs walking on planet
             dinosaurs.forEach(dino => {
